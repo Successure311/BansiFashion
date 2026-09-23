@@ -5,8 +5,8 @@ import ColourInput from "./ColourInput";
 import { appendEntry } from "../api/sheetApi";
 
 const MODE_CONFIG = {
-  Inward: { refField: "LotNo", refLabel: "Lot No.", refPlaceholder: "e.g. LOT-2451", accent: "Inward" },
-  Outward: { refField: "ChallanNo", refLabel: "Challan No.", refPlaceholder: "e.g. CH-1092", accent: "Outward" },
+  Inward: { refField: "LotNo", refLabel: "Lot No." },
+  Outward: { refField: "ChallanNo", refLabel: "Challan No." },
 };
 
 function toSheetDate(date) {
@@ -33,10 +33,11 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
   const isValid = date && qualityName && colourNo !== "" && meter !== "" && refValue.trim() !== "";
 
   function resetFieldsAfterSubmit() {
+    setQualityName("");
     setColourNo("");
     setMeter("");
     setRefValue("");
-    // date and qualityName kept, for fast repeated entry of the same quality/date
+    // date is kept, since consecutive entries are usually the same day
   }
 
   function handleSubmit(e) {
@@ -94,7 +95,6 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
           inputMode="decimal"
           value={meter}
           onChange={(e) => setMeter(e.target.value)}
-          placeholder="e.g. 45.5"
           className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
         />
       </div>
@@ -103,9 +103,9 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
         <label className="block text-sm font-semibold text-gray-700 mb-1">{config.refLabel}</label>
         <input
           type="text"
+          inputMode="numeric"
           value={refValue}
           onChange={(e) => setRefValue(e.target.value)}
-          placeholder={config.refPlaceholder}
           className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
         />
       </div>

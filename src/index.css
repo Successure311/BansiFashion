@@ -42,3 +42,14 @@ body {
 .react-datepicker__triangle {
   display: none;
 }
+
+/* withPortal: full-screen calendar on mobile, sized well above the
+   library's small default so it reads as a proper full-screen picker. */
+.react-datepicker__portal {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+@media (max-width: 480px) {
+  .react-datepicker__portal .react-datepicker {
+    transform: scale(1.3);
+  }
+}

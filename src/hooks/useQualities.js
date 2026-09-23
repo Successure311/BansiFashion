@@ -4,13 +4,20 @@ import { defaultQualities } from "../data/defaultQualities";
 
 const POLL_INTERVAL_MS = 8000;
 
+function toRangeNumber(v) {
+  // Blank/missing range means "no fixed range" - any colour number is valid.
+  if (v === "" || v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
 function normaliseRows(rows) {
   return rows
     .filter((r) => r.QualityName)
     .map((r) => ({
       name: String(r.QualityName).trim(),
-      start: Number(r.RangeStart),
-      end: Number(r.RangeEnd),
+      start: toRangeNumber(r.RangeStart),
+      end: toRangeNumber(r.RangeEnd),
     }));
 }
 
@@ -52,8 +59,12 @@ export function useQualities() {
 
   const addQuality = useCallback(async ({ name, start, end }) => {
     const trimmed = name.trim();
-    await upsertQuality({ QualityName: trimmed, RangeStart: start, RangeEnd: end });
-    setQualities((prev) => mergeByName(prev, [{ name: trimmed, start, end }]));
+    await upsertQuality({
+      QualityName: trimmed,
+      RangeStart: start ?? "",
+      RangeEnd: end ?? "",
+    });
+    setQualities((prev) => mergeByName(prev, [{ name: trimmed, start: start ?? null, end: end ?? null }]));
     return trimmed;
   }, []);
 

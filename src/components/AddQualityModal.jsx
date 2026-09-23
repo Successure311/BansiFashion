@@ -7,14 +7,22 @@ export default function AddQualityModal({ onClose, onAdd }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const isValid = name.trim() && start !== "" && end !== "" && Number(end) >= Number(start);
+  // Range is optional - a quality with no range allows any colour number.
+  // But if one side is given, the other must be too, and end >= start.
+  const bothBlank = start === "" && end === "";
+  const bothFilled = start !== "" && end !== "" && Number(end) >= Number(start);
+  const isValid = name.trim() && (bothBlank || bothFilled);
 
   async function handleSave() {
     if (!isValid) return;
     setSaving(true);
     setError(null);
     try {
-      await onAdd({ name: name.trim(), start: Number(start), end: Number(end) });
+      await onAdd({
+        name: name.trim(),
+        start: bothFilled ? Number(start) : null,
+        end: bothFilled ? Number(end) : null,
+      });
     } catch (err) {
       setError(err.message);
       setSaving(false);
@@ -42,7 +50,9 @@ export default function AddQualityModal({ onClose, onAdd }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Range Start</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Range Start <span className="font-normal text-gray-400">(optional)</span>
+              </label>
               <input
                 type="number"
                 value={start}
@@ -51,7 +61,9 @@ export default function AddQualityModal({ onClose, onAdd }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Range End</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Range End <span className="font-normal text-gray-400">(optional)</span>
+              </label>
               <input
                 type="number"
                 value={end}
@@ -60,6 +72,9 @@ export default function AddQualityModal({ onClose, onAdd }) {
               />
             </div>
           </div>
+          <p className="text-xs text-gray-400 -mt-2">
+            Leave both blank if this quality has no fixed colour range — you'll be able to enter any colour number for it.
+          </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-3 pt-2">
             <button
