@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { sheetRead, upsertQuality } from "../api/sheetApi";
 import { defaultQualities } from "../data/defaultQualities";
+
+const POLL_INTERVAL_MS = 8000;
 
 function normaliseRows(rows) {
   return rows
@@ -22,22 +24,30 @@ export function useQualities() {
   const [qualities, setQualities] = useState(defaultQualities);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const inFlight = useRef(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const load = useCallback(async (silent = false) => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    if (!silent) setLoading(true);
     try {
       const rows = await sheetRead("QualityMaster");
-      setQualities((prev) => mergeByName(defaultQualities, normaliseRows(rows)));
+      setQualities(mergeByName(defaultQualities, normaliseRows(rows)));
+      if (!silent) setError(null);
     } catch (err) {
-      setError(err.message);
+      if (!silent) setError(err.message);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
+      inFlight.current = false;
     }
   }, []);
 
   useEffect(() => {
     load();
+    // Pick up qualities added or edited directly in the Google Sheet
+    // (not just ones added from this app) without needing a page reload.
+    const interval = setInterval(() => load(true), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, [load]);
 
   const addQuality = useCallback(async ({ name, start, end }) => {

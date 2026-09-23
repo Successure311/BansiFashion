@@ -9,8 +9,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
 
   const isValid = name.trim() && start !== "" && end !== "" && Number(end) >= Number(start);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSave() {
     if (!isValid) return;
     setSaving(true);
     setError(null);
@@ -26,7 +25,10 @@ export default function AddQualityModal({ onClose, onAdd }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5">
         <h3 className="text-lg font-bold text-gray-800 mb-4">Add New Quality</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Not a <form>: this modal renders inside the Inward/Outward <form>,
+            and a nested <form> would let its submit event bubble into the
+            outer form's handler instead of firing a save here. */}
+        <div className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Quality Name</label>
             <input
@@ -68,14 +70,15 @@ export default function AddQualityModal({ onClose, onAdd }) {
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSave}
               disabled={!isValid || saving}
               className="flex-1 rounded-lg bg-brand py-2.5 font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
