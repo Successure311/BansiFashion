@@ -39,26 +39,34 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
     // date and qualityName kept, for fast repeated entry of the same quality/date
   }
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault();
-    if (!isValid) return;
+    if (!isValid || saving) return;
+
+    const row = {
+      Date: toSheetDate(date),
+      QualityName: qualityName,
+      ColourNo: colourNo,
+      Meter: meter,
+      [config.refField]: refValue.trim(),
+    };
+
+    // Optimistic: confirm instantly and clear the form so the next entry can
+    // be typed right away. The actual save to the sheet happens in the
+    // background; only surface a toast if it turns out to have failed.
+    showToast(`${mode} Entry Done`, "success");
+    resetFieldsAfterSubmit();
     setSaving(true);
-    try {
-      const row = {
-        Date: toSheetDate(date),
-        QualityName: qualityName,
-        ColourNo: colourNo,
-        Meter: meter,
-        [config.refField]: refValue.trim(),
-      };
-      await appendEntry(mode, row);
-      showToast(`${mode} entry added successfully`, "success");
-      resetFieldsAfterSubmit();
-    } catch (err) {
-      showToast(err.message || "Failed to save entry", "error");
-    } finally {
-      setSaving(false);
-    }
+    setTimeout(() => setSaving(false), 400); // brief guard against a double-tap
+
+    appendEntry(mode, row).catch((err) => {
+      showToast(
+        `Could not save ${mode.toLowerCase()} entry (${config.refLabel} ${row[config.refField]}) — ${
+          err.message || "check your connection"
+        }`,
+        "error"
+      );
+    });
   }
 
   return (
@@ -107,7 +115,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
         disabled={!isValid || saving}
         className="w-full rounded-lg bg-brand py-3 font-bold text-white text-base hover:bg-brand-dark disabled:opacity-50 transition-colors"
       >
-        {saving ? "Saving…" : `Add ${mode} Entry`}
+        Add {mode} Entry
       </button>
     </form>
   );

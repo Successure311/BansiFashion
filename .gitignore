@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+bansi-fashion-netlify.zip
 
 # Editor directories and files
 .vscode/*
