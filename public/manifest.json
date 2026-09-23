@@ -1,0 +1,12 @@
+{
+  "name": "Bansi Fashion",
+  "short_name": "Bansi Fashion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3f4",
+  "theme_color": "#a3123a",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
