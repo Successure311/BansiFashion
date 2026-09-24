@@ -3,58 +3,43 @@ import SummaryCards from "./SummaryCards";
 import BreakdownTable from "./BreakdownTable";
 import ColourSearch from "./ColourSearch";
 
-function sumMeter(rows) {
-  return rows.reduce((total, r) => total + (Number(r.Meter) || 0), 0);
-}
-
-// One pass over the rows instead of re-filtering per quality.
-function totalsBy(rows, key) {
-  const map = new Map();
-  for (const r of rows) map.set(r[key], (map.get(r[key]) || 0) + r.Meter);
-  return map;
+function sumOf(rows, field) {
+  return rows.reduce((total, r) => total + r[field], 0);
 }
 
 export default function AnalysisTab({ qualities, entries }) {
-  const { inward, outward, loading, error, refresh } = entries;
+  const { rows, loading, error, refresh } = entries;
   const [qualityName, setQualityName] = useState("");
   const [colourNo, setColourNo] = useState("");
 
   // Default view (no quality picked): every quality's totals at a glance.
   const allQualityRows = useMemo(() => {
-    const inTotals = totalsBy(inward, "QualityName");
-    const outTotals = totalsBy(outward, "QualityName");
-    return Array.from(new Set([...inTotals.keys(), ...outTotals.keys()]))
-      .sort((a, b) => a.localeCompare(b))
-      .map((name) => ({
-        key: name,
-        inward: inTotals.get(name) || 0,
-        outward: outTotals.get(name) || 0,
-      }));
-  }, [inward, outward]);
+    const byQuality = new Map();
+    for (const r of rows) {
+      const t = byQuality.get(r.QualityName) || { key: r.QualityName, inward: 0, outward: 0 };
+      t.inward += r.Inward;
+      t.outward += r.Outward;
+      byQuality.set(r.QualityName, t);
+    }
+    return Array.from(byQuality.values()).sort((a, b) => a.key.localeCompare(b.key));
+  }, [rows]);
 
-  const qualityInward = useMemo(
-    () => inward.filter((r) => r.QualityName === qualityName),
-    [inward, qualityName]
-  );
-  const qualityOutward = useMemo(
-    () => outward.filter((r) => r.QualityName === qualityName),
-    [outward, qualityName]
+  const qualityRows = useMemo(
+    () => rows.filter((r) => r.QualityName === qualityName),
+    [rows, qualityName]
   );
 
-  const colourOptions = useMemo(() => {
-    const set = new Set([
-      ...qualityInward.map((r) => r.ColourNo),
-      ...qualityOutward.map((r) => r.ColourNo),
-    ]);
-    return Array.from(set).sort((a, b) => Number(a) - Number(b));
-  }, [qualityInward, qualityOutward]);
+  const colourOptions = useMemo(
+    () =>
+      Array.from(new Set(qualityRows.map((r) => r.ColourNo))).sort(
+        (a, b) => Number(a) - Number(b)
+      ),
+    [qualityRows]
+  );
 
-  const summaryInward = colourNo
-    ? sumMeter(qualityInward.filter((r) => r.ColourNo === colourNo))
-    : sumMeter(qualityInward);
-  const summaryOutward = colourNo
-    ? sumMeter(qualityOutward.filter((r) => r.ColourNo === colourNo))
-    : sumMeter(qualityOutward);
+  const shown = colourNo ? qualityRows.filter((r) => r.ColourNo === colourNo) : qualityRows;
+  const summaryInward = sumOf(shown, "Inward");
+  const summaryOutward = sumOf(shown, "Outward");
 
   function selectQuality(name) {
     setQualityName(name);

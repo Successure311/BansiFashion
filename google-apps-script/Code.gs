@@ -88,6 +88,42 @@ function upsertRow_(name, rowObj, keyColumn) {
   appendRow_(name, rowObj);
 }
 
+// Pre-added totals per quality + colour. Tiny payload, and cached so most
+// reads skip opening the spreadsheet at all. Cleared on every write.
+var SUMMARY_CACHE_KEY = 'summary_v1';
+var SUMMARY_CACHE_SECONDS = 30;
+
+function buildSummary_() {
+  var totals = {};
+  ['Inward', 'Outward'].forEach(function (name) {
+    var sh = getSheet_(name);
+    var last = sh.getLastRow();
+    if (last < 2) return;
+    // Columns B..D = QualityName, ColourNo, Meter (see SCHEMA).
+    var values = sh.getRange(2, 2, last - 1, 3).getValues();
+    for (var i = 0; i < values.length; i++) {
+      var q = String(values[i][0]).trim();
+      if (!q) continue;
+      var c = String(values[i][1]).trim();
+      var key = q + '' + c;
+      var t = totals[key] || (totals[key] = { QualityName: q, ColourNo: c, Inward: 0, Outward: 0 });
+      t[name] += parseFloat(values[i][2]) || 0;
+    }
+  });
+  return Object.keys(totals).map(function (k) { return totals[k]; });
+}
+
+function summaryJson_(fresh) {
+  var cache = CacheService.getScriptCache();
+  if (!fresh) {
+    var hit = cache.get(SUMMARY_CACHE_KEY);
+    if (hit) return ContentService.createTextOutput(hit).setMimeType(ContentService.MimeType.JSON);
+  }
+  var text = JSON.stringify(buildSummary_());
+  try { cache.put(SUMMARY_CACHE_KEY, text, SUMMARY_CACHE_SECONDS); } catch (e) { /* too big to cache */ }
+  return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.JSON);
+}
+
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
@@ -96,6 +132,7 @@ function json_(obj) {
 function doGet(e) {
   try {
     var params = e.parameter;
+    if (params.summary) return summaryJson_(params.fresh === '1');
     if (params.sheets) {
       var names = params.sheets.split(',');
       var out = {};
@@ -127,6 +164,7 @@ function doPost(e) {
       appendRow_(body.sheet, body.row);
     }
     SpreadsheetApp.flush();
+    CacheService.getScriptCache().remove(SUMMARY_CACHE_KEY);
     return json_({ ok: true });
   } catch (err) {
     return json_({ error: String(err), retryable: true });

@@ -23,6 +23,16 @@ export async function sheetReadMany(tabs) {
   return data;
 }
 
+// Pre-added totals per quality+colour (needs the updated Apps Script).
+// `fresh` skips the server-side cache.
+export async function sheetSummary(fresh = false) {
+  const res = await fetch(`${WEBAPP_URL}?summary=1${fresh ? "&fresh=1" : ""}`);
+  const data = await readJson(res);
+  if (data && data.error) throw new Error(data.error);
+  if (!Array.isArray(data)) throw new Error("Summary not supported by server");
+  return data;
+}
+
 export async function sheetPost(payload) {
   const res = await fetch(WEBAPP_URL, {
     method: "POST",
