@@ -8,8 +8,9 @@ export default function ColourSearch({ options, value, onChange }) {
 
   const matches = useMemo(() => {
     const q = text.trim();
-    return q ? options.filter((c) => c.includes(q)) : options;
-  }, [options, text]);
+    // A colour is already picked: show the whole list so another can be chosen.
+    return q && q !== value ? options.filter((c) => c.includes(q)) : options;
+  }, [options, text, value]);
 
   function commit(next) {
     setText(next);
@@ -29,7 +30,11 @@ export default function ColourSearch({ options, value, onChange }) {
         pattern="[0-9]*"
         autoComplete="off"
         value={text}
-        onFocus={() => setOpen(true)}
+        onFocus={(e) => {
+          setOpen(true);
+          e.target.select();
+        }}
+        onClick={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         onChange={(e) => {
           const v = e.target.value;
