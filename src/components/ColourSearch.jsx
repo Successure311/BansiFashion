@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 export default function ColourSearch({ options, value, onChange }) {
   const [text, setText] = useState(value);
   const [open, setOpen] = useState(false);
+  const [hi, setHi] = useState(0);
 
   const matches = useMemo(() => {
     const q = text.trim();
@@ -15,6 +16,26 @@ export default function ColourSearch({ options, value, onChange }) {
   function commit(next) {
     setText(next);
     onChange(next);
+  }
+
+  function onKeyDown(e) {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      setOpen(true);
+      const n = matches.length;
+      if (n) setHi((h) => (e.key === "ArrowDown" ? (h + 1) % n : (h - 1 + n) % n));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const q = text.trim();
+      // Exact number typed wins; otherwise the highlighted (default: first) match.
+      const choice = options.includes(q) ? q : matches[Math.min(hi, matches.length - 1)];
+      if (choice) {
+        pick(choice);
+        e.target.blur();
+      }
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
   }
 
   function pick(c) {
@@ -35,10 +56,12 @@ export default function ColourSearch({ options, value, onChange }) {
           e.target.select();
         }}
         onClick={() => setOpen(true)}
+        onKeyDown={onKeyDown}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         onChange={(e) => {
           const v = e.target.value;
           setText(v);
+          setHi(0);
           setOpen(true);
           onChange(options.includes(v.trim()) ? v.trim() : "");
         }}
@@ -64,12 +87,14 @@ export default function ColourSearch({ options, value, onChange }) {
           {matches.length === 0 ? (
             <li className="px-3 py-2.5 text-sm text-gray-400">No matching colour</li>
           ) : (
-            matches.map((c) => (
+            matches.map((c, i) => (
               <li
                 key={c}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(c)}
                 className={`px-3 py-2.5 text-base cursor-pointer active:bg-gray-100 ${
+                  i === hi ? "bg-gray-100 " : ""
+                }${
                   c === value ? "font-bold text-brand" : "text-gray-800"
                 }`}
               >
