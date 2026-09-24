@@ -49,7 +49,8 @@ if errorlevel 1 (
 )
 
 echo.
-echo Pushed to GitHub. Netlify will auto-build and deploy in a minute or two.
+echo Pushed to GitHub. Netlify and Cloudflare Pages will auto-build in a minute or two.
 echo Site: https://bansifashion.netlify.app/
+echo Cloudflare: check Workers ^& Pages in the dashboard for your .pages.dev URL
 echo.
 pause

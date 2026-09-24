@@ -1,29 +1,34 @@
 import { useMemo, useState } from "react";
-import { useEntries } from "../hooks/useEntries";
 import SummaryCards from "./SummaryCards";
 import BreakdownTable from "./BreakdownTable";
+import ColourSearch from "./ColourSearch";
 
 function sumMeter(rows) {
   return rows.reduce((total, r) => total + (Number(r.Meter) || 0), 0);
 }
 
-export default function AnalysisTab({ qualities }) {
-  const { inward, outward, loading, error, refresh } = useEntries();
+// One pass over the rows instead of re-filtering per quality.
+function totalsBy(rows, key) {
+  const map = new Map();
+  for (const r of rows) map.set(r[key], (map.get(r[key]) || 0) + r.Meter);
+  return map;
+}
+
+export default function AnalysisTab({ qualities, entries }) {
+  const { inward, outward, loading, error, refresh } = entries;
   const [qualityName, setQualityName] = useState("");
   const [colourNo, setColourNo] = useState("");
 
   // Default view (no quality picked): every quality's totals at a glance.
   const allQualityRows = useMemo(() => {
-    const names = new Set([
-      ...inward.map((r) => r.QualityName),
-      ...outward.map((r) => r.QualityName),
-    ]);
-    return Array.from(names)
+    const inTotals = totalsBy(inward, "QualityName");
+    const outTotals = totalsBy(outward, "QualityName");
+    return Array.from(new Set([...inTotals.keys(), ...outTotals.keys()]))
       .sort((a, b) => a.localeCompare(b))
       .map((name) => ({
         key: name,
-        inward: sumMeter(inward.filter((r) => r.QualityName === name)),
-        outward: sumMeter(outward.filter((r) => r.QualityName === name)),
+        inward: inTotals.get(name) || 0,
+        outward: outTotals.get(name) || 0,
       }));
   }, [inward, outward]);
 
@@ -43,14 +48,6 @@ export default function AnalysisTab({ qualities }) {
     ]);
     return Array.from(set).sort((a, b) => Number(a) - Number(b));
   }, [qualityInward, qualityOutward]);
-
-  const colourBreakdownRows = useMemo(() => {
-    return colourOptions.map((colour) => ({
-      key: colour,
-      inward: sumMeter(qualityInward.filter((r) => r.ColourNo === colour)),
-      outward: sumMeter(qualityOutward.filter((r) => r.ColourNo === colour)),
-    }));
-  }, [colourOptions, qualityInward, qualityOutward]);
 
   const summaryInward = colourNo
     ? sumMeter(qualityInward.filter((r) => r.ColourNo === colourNo))
@@ -101,18 +98,12 @@ export default function AnalysisTab({ qualities }) {
               <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Colour No. (optional)
               </label>
-              <select
+              <ColourSearch
+                key={qualityName}
+                options={colourOptions}
                 value={colourNo}
-                onChange={(e) => setColourNo(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
-              >
-                <option value="">All colours</option>
-                {colourOptions.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                onChange={setColourNo}
+              />
             </div>
           )}
         </div>
@@ -125,16 +116,6 @@ export default function AnalysisTab({ qualities }) {
             totalOutward={summaryOutward}
             label={colourNo ? `${qualityName} — Colour ${colourNo}` : qualityName}
           />
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3">
-            <p className="text-sm font-semibold text-gray-500">Colour-wise breakdown</p>
-            <BreakdownTable
-              columnLabel="Colour No."
-              rows={colourBreakdownRows}
-              activeKey={colourNo}
-              onRowClick={setColourNo}
-              emptyMessage="No entries yet for this quality."
-            />
-          </div>
         </>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3">

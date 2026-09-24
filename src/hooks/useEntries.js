@@ -32,7 +32,9 @@ function saveCache(data) {
   }
 }
 
-export function useEntries() {
+// `active`: poll only while the Analysis tab is showing; the first load always
+// runs at app start so the tab is ready before it is opened.
+export function useEntries(active = true) {
   const [cache] = useState(() => loadCache());
   const [inward, setInward] = useState(cache?.inward || []);
   const [outward, setOutward] = useState(cache?.outward || []);
@@ -65,12 +67,22 @@ export function useEntries() {
     // If we already have cached totals to show, fetch fresh data quietly
     // in the background instead of blocking the screen with a spinner.
     load(!!cache);
-    // Keep totals fresh while the tab is open, so entries added by other
-    // users on other devices show up without a manual refresh.
-    const interval = setInterval(() => load(true), POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load]);
+
+  useEffect(() => {
+    if (!active) return;
+    // Refresh right when the tab opens, then keep totals fresh so entries
+    // added on other devices show up without a manual refresh.
+    load(true);
+    const interval = setInterval(() => load(true), POLL_INTERVAL_MS);
+    const onVisible = () => document.visibilityState === "visible" && load(true);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [active, load]);
 
   const refresh = useCallback(() => load(false), [load]);
 

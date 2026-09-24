@@ -1,0 +1,41 @@
+BANSI FASHION APP - CLOUDFLARE PAGES (second host, deploys from Git)
+====================================================================
+
+Netlify stays exactly as it is. Both hosts build from the same GitHub repo
+(Successure311/BansiFashion, branch main) and use the same Google Sheet,
+so entries show up on both URLs.
+
+No code changes are needed for Cloudflare. The build settings are:
+  Framework preset : Vite  (or None)
+  Build command    : npm run build
+  Build output dir : dist
+  Node version     : 22  (from the .node-version file in this repo)
+
+
+FIRST-TIME SETUP (do once)
+--------------------------
+1. Push this repo to GitHub (run DeployOnGit.bat).
+2. https://dash.cloudflare.com > Workers & Pages > Create application.
+3. Choose the "Pages" tab > "Import an existing Git repository"
+   (NOT "Direct Upload", NOT the Workers flow).
+   If you only see Workers: click the small "Looking to deploy Pages?
+   Get started" link at the bottom.
+4. Connect GitHub > authorize Cloudflare > select the BansiFashion repo.
+5. Project name: pick e.g. "bansi" (becomes bansi.pages.dev - name can't be
+   changed later). Production branch: main.
+6. Build settings as listed above. No environment variables needed.
+7. Save and Deploy. First build takes ~1-2 minutes.
+
+
+TO UPDATE THE APP LATER
+-----------------------
+Just run DeployOnGit.bat. One git push = Netlify AND Cloudflare both rebuild.
+Check progress at Workers & Pages > your project > Deployments.
+
+
+TROUBLESHOOTING
+---------------
+- Build fails with a Node/Vite version error: Settings > Variables and
+  Secrets > add NODE_VERSION = 22, then retry the deployment.
+- Blank page on phone after an update: close and reopen the app once.
+- To stop Cloudflare auto-deploying: project Settings > Builds > pause.
