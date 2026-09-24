@@ -7,10 +7,12 @@ export default function ColourSearch({ options, value, onChange }) {
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState(0);
 
-  const matches = useMemo(() => {
+  // "" stands for "All colours"; it is listed whenever the full list is shown.
+  const items = useMemo(() => {
     const q = text.trim();
     // A colour is already picked: show the whole list so another can be chosen.
-    return q && q !== value ? options.filter((c) => c.includes(q)) : options;
+    if (!q || q === value) return ["", ...options];
+    return options.filter((c) => c.includes(q));
   }, [options, text, value]);
 
   function commit(next) {
@@ -22,14 +24,14 @@ export default function ColourSearch({ options, value, onChange }) {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
       setOpen(true);
-      const n = matches.length;
+      const n = items.length;
       if (n) setHi((h) => (e.key === "ArrowDown" ? (h + 1) % n : (h - 1 + n) % n));
     } else if (e.key === "Enter") {
       e.preventDefault();
       const q = text.trim();
       // Exact number typed wins; otherwise the highlighted (default: first) match.
-      const choice = options.includes(q) ? q : matches[Math.min(hi, matches.length - 1)];
-      if (choice) {
+      const choice = options.includes(q) ? q : items[Math.min(hi, items.length - 1)];
+      if (choice !== undefined) {
         pick(choice);
         e.target.blur();
       }
@@ -84,12 +86,12 @@ export default function ColourSearch({ options, value, onChange }) {
       )}
       {open && (
         <ul className="absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
-          {matches.length === 0 ? (
+          {items.length === 0 ? (
             <li className="px-3 py-2.5 text-sm text-gray-400">No matching colour</li>
           ) : (
-            matches.map((c, i) => (
+            items.map((c, i) => (
               <li
-                key={c}
+                key={c || "all"}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(c)}
                 className={`px-3 py-2.5 text-base cursor-pointer active:bg-gray-100 ${
@@ -98,7 +100,7 @@ export default function ColourSearch({ options, value, onChange }) {
                   c === value ? "font-bold text-brand" : "text-gray-800"
                 }`}
               >
-                {c}
+                {c || "All colours"}
               </li>
             ))
           )}
