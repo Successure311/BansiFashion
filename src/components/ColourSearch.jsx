@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 // Numeric-keyboard search box with tap-to-pick suggestions from the colours
 // that already exist for the chosen quality.
@@ -6,6 +6,7 @@ export default function ColourSearch({ options, value, onChange }) {
   const [text, setText] = useState(value);
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState(0);
+  const inputRef = useRef(null);
 
   // "" stands for "All colours"; it is listed whenever the full list is shown.
   const items = useMemo(() => {
@@ -43,11 +44,13 @@ export default function ColourSearch({ options, value, onChange }) {
   function pick(c) {
     commit(c);
     setOpen(false);
+    inputRef.current?.blur(); // hides the phone keyboard until the box is tapped again
   }
 
   return (
     <div className="relative">
       <input
+        ref={inputRef}
         type="text"
         inputMode="numeric"
         pattern="[0-9]*"
@@ -77,6 +80,7 @@ export default function ColourSearch({ options, value, onChange }) {
           onClick={() => {
             commit("");
             setOpen(false);
+            inputRef.current?.blur();
           }}
           aria-label="Clear colour"
           className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 text-gray-400 text-lg leading-none"
