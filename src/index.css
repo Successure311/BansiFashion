@@ -7,6 +7,15 @@
   --color-brand-light: #fdecf0;
 }
 
+html,
+body {
+  /* Fixed layout: no pinch-zoom or double-tap zoom, no sideways stretching. */
+  touch-action: pan-y;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background-color: #f7f3f4;
 }
