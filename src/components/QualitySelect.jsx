@@ -29,7 +29,7 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
         onChange={handleSelect}
         className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
       >
-        <option value="" disabled>
+        <option value="">
           Select quality…
         </option>
         {qualities.map((q) => (
