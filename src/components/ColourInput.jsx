@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const inputCls =
   "w-full rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand disabled:bg-gray-100 disabled:text-gray-400";
@@ -38,8 +38,12 @@ export default function ColourInput({
   }, [hasRange, quality]);
 
   const error = apcMode ? null : colourError(quality, value);
+  const [open, setOpen] = useState(false);
+  // Saved APC remarks for this quality that match what is typed (all when empty).
   const typed = apcText.trim().toLowerCase();
-  const shownSuggestions = apcSuggestions.filter((s) => s.toLowerCase() !== typed);
+  const matches = apcSuggestions.filter(
+    (s) => s.toLowerCase().includes(typed) && s.toLowerCase() !== typed
+  );
 
   return (
     <div>
@@ -72,31 +76,38 @@ export default function ColourInput({
       </div>
 
       {apcMode ? (
-        <div className="space-y-2">
+        <div className="relative">
           <input
             type="text"
             autoComplete="off"
             value={apcText}
-            onChange={(e) => onApcText(e.target.value)}
-            placeholder="Write APC remark"
+            onChange={(e) => {
+              onApcText(e.target.value);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            onClick={() => setOpen(true)}
+            onBlur={() => setTimeout(() => setOpen(false), 150)}
+            placeholder={apcSuggestions.length ? "Search saved APC or write new" : "Write APC remark"}
             className={inputCls}
           />
-          {shownSuggestions.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-gray-400 mb-1">Saved APC remarks — tap to use</p>
-              <div className="flex flex-wrap gap-1.5">
-                {shownSuggestions.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => onApcText(s)}
-                    className="px-3 py-1.5 rounded-full bg-brand-light text-brand text-sm font-semibold border border-brand/20 active:bg-brand active:text-white"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
+          {open && matches.length > 0 && (
+            <ul className="absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+              {matches.map((m) => (
+                <li
+                  key={m}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    onApcText(m);
+                    setOpen(false);
+                    document.activeElement?.blur();
+                  }}
+                  className="px-3.5 py-2.5 text-base cursor-pointer text-gray-800 active:bg-brand-light hover:bg-brand-light"
+                >
+                  {m}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       ) : (
