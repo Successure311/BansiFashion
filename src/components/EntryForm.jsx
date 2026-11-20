@@ -95,7 +95,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5">
+    <form onSubmit={handleSubmit} className="space-y-4 surface-card rounded-3xl p-5">
       <DateField value={date} onChange={setDate} />
 
       <QualitySelect
@@ -130,7 +130,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
           inputMode="decimal"
           value={meter}
           onChange={(e) => setMeter(e.target.value)}
-          className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+          className="w-full field rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
         />
       </div>
 
@@ -144,14 +144,14 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
           inputMode={config.optional ? "text" : "numeric"}
           value={refValue}
           onChange={(e) => setRefValue(e.target.value)}
-          className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+          className="w-full field rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
         />
       </div>
 
       <button
         type="submit"
         disabled={!isValid || saving}
-        className="w-full rounded-xl bg-gradient-to-r from-brand to-brand-dark py-3.5 font-bold text-white text-base shadow-lg shadow-brand/30 active:scale-[0.99] disabled:opacity-40 disabled:shadow-none transition-all"
+        className="w-full btn-primary py-3.5 font-bold text-white text-base"
       >
         Add {mode} Entry
       </button>

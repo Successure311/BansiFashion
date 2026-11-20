@@ -45,7 +45,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder='e.g. PURE MUL CHANDERI 56"'
-              className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+              className="w-full field rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -57,7 +57,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
                 type="number"
                 value={start}
                 onChange={(e) => setStart(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+                className="w-full field rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
               />
             </div>
             <div>
@@ -68,7 +68,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
                 type="number"
                 value={end}
                 onChange={(e) => setEnd(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+                className="w-full field rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
               />
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
               type="button"
               onClick={handleSave}
               disabled={!isValid || saving}
-              className="flex-1 rounded-xl bg-brand py-3 font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+              className="flex-1 btn-primary py-3 font-semibold text-white"
             >
               {saving ? "Saving…" : "Save"}
             </button>

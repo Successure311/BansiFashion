@@ -71,7 +71,7 @@ export default function ColourSearch({ options, value, onChange }) {
           onChange(options.includes(v.trim()) ? v.trim() : "");
         }}
         placeholder="All colours — type to search"
-        className="w-full rounded-xl border border-gray-200 px-3.5 py-3 pr-10 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+        className="w-full field rounded-xl border border-gray-200 px-3.5 py-3 pr-10 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
       />
       {text && (
         <button

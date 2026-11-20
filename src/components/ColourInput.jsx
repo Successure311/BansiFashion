@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 const inputCls =
-  "w-full rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand disabled:bg-gray-100 disabled:text-gray-400";
+  "w-full field rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand disabled:bg-gray-100 disabled:text-gray-400";
 
 // Whole-number colour inside the quality's fixed range (no range = any number).
 export function colourError(quality, value) {

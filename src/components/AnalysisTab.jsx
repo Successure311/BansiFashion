@@ -62,7 +62,7 @@ export default function AnalysisTab({ qualities, entries }) {
 
   return (
     <div className="space-y-5">
-      <div className="bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5 space-y-4">
+      <div className="surface-card rounded-3xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-800">Analysis</h2>
           <button
@@ -81,7 +81,7 @@ export default function AnalysisTab({ qualities, entries }) {
             <select
               value={qualityName}
               onChange={(e) => selectQuality(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+              className="w-full field rounded-xl border border-gray-200 px-3.5 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
             >
               <option value="">All qualities</option>
               {qualities.map((q) => (
@@ -115,7 +115,7 @@ export default function AnalysisTab({ qualities, entries }) {
             totalOutward={summaryOutward}
             label={colourNo ? `${qualityName} — Colour ${colourNo}` : qualityName}
           />
-          <div className="bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5 space-y-3">
+          <div className="surface-card rounded-3xl p-5 space-y-3">
             <p className="text-sm font-semibold text-gray-500">Colour-wise</p>
             <BreakdownTable
               columnLabel="Colour No."
@@ -125,7 +125,7 @@ export default function AnalysisTab({ qualities, entries }) {
           </div>
         </>
       ) : (
-        <div className="bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5 space-y-3">
+        <div className="surface-card rounded-3xl p-5 space-y-3">
           <p className="text-sm font-semibold text-gray-500">All qualities</p>
           <BreakdownTable
             columnLabel="Quality Name"
