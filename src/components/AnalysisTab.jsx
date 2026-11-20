@@ -43,6 +43,14 @@ export default function AnalysisTab({ qualities, entries }) {
     [qualityRows]
   );
 
+  // Colour-wise rows for the selected quality (one colour if one is picked).
+  const colourRows = useMemo(() => {
+    const order = new Map(colourOptions.map((c, i) => [c, i]));
+    return (colourNo ? qualityRows.filter((r) => r.ColourNo === colourNo) : qualityRows)
+      .map((r) => ({ key: r.ColourNo, inward: r.Inward, outward: r.Outward }))
+      .sort((x, y) => order.get(x.key) - order.get(y.key));
+  }, [qualityRows, colourOptions, colourNo]);
+
   const shown = colourNo ? qualityRows.filter((r) => r.ColourNo === colourNo) : qualityRows;
   const summaryInward = sumOf(shown, "Inward");
   const summaryOutward = sumOf(shown, "Outward");
@@ -107,6 +115,14 @@ export default function AnalysisTab({ qualities, entries }) {
             totalOutward={summaryOutward}
             label={colourNo ? `${qualityName} — Colour ${colourNo}` : qualityName}
           />
+          <div className="bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5 space-y-3">
+            <p className="text-sm font-semibold text-gray-500">Colour-wise</p>
+            <BreakdownTable
+              columnLabel="Colour No."
+              rows={colourRows}
+              emptyMessage="No entries for this quality yet."
+            />
+          </div>
         </>
       ) : (
         <div className="bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5 space-y-3">
