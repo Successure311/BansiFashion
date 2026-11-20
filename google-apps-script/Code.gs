@@ -18,7 +18,7 @@
  */
 
 var SCHEMA = {
-  Inward: ['Date', 'QualityName', 'ColourNo', 'Meter', 'LotNo'],
+  Inward: ['Date', 'QualityName', 'ColourNo', 'Meter', 'Remarks'],
   Outward: ['Date', 'QualityName', 'ColourNo', 'Meter', 'ChallanNo'],
   QualityMaster: ['QualityName', 'RangeStart', 'RangeEnd']
 };
@@ -188,4 +188,13 @@ function seedQualityMaster() {
   defaults.forEach(function (d) {
     upsertRow_('QualityMaster', { QualityName: d[0], RangeStart: d[1], RangeEnd: d[2] }, 'QualityName');
   });
+}
+
+// Run ONCE from the Apps Script editor after redeploying: renames the old
+// "LotNo" header in the Inward tab to "Remarks". Existing rows are kept.
+function renameLotNoToRemarks() {
+  var sh = getSheet_('Inward');
+  var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  var i = headers.indexOf('LotNo');
+  if (i !== -1) sh.getRange(1, i + 1).setValue('Remarks');
 }

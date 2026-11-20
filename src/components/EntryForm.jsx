@@ -73,6 +73,9 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
       ColourNo: apcMode ? makeApcColour(apcText) : colourNo,
       Meter: meter,
       [config.refField]: refValue.trim(),
+      // Inward remarks are sent under both names so the app works with the old
+      // (LotNo) and the new (Remarks) Apps Script, whichever is deployed.
+      ...(mode === "Inward" ? { Remarks: refValue.trim() } : {}),
     };
 
     // Optimistic: confirm instantly and clear the form so the next entry can
