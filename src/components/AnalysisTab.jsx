@@ -31,9 +31,15 @@ export default function AnalysisTab({ qualities, entries }) {
 
   const colourOptions = useMemo(
     () =>
-      Array.from(new Set(qualityRows.map((r) => r.ColourNo))).sort(
-        (a, b) => Number(a) - Number(b)
-      ),
+      Array.from(new Set(qualityRows.map((r) => r.ColourNo))).sort((a, b) => {
+        const na = Number(a);
+        const nb = Number(b);
+        if (Number.isNaN(na) || Number.isNaN(nb)) {
+          if (Number.isNaN(na) && Number.isNaN(nb)) return a.localeCompare(b);
+          return Number.isNaN(na) ? 1 : -1; // APC remarks after numbers
+        }
+        return na - nb;
+      }),
     [qualityRows]
   );
 
@@ -48,7 +54,7 @@ export default function AnalysisTab({ qualities, entries }) {
 
   return (
     <div className="space-y-5">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+      <div className="bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-800">Analysis</h2>
           <button
@@ -67,7 +73,7 @@ export default function AnalysisTab({ qualities, entries }) {
             <select
               value={qualityName}
               onChange={(e) => selectQuality(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+              className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
             >
               <option value="">All qualities</option>
               {qualities.map((q) => (
@@ -103,7 +109,7 @@ export default function AnalysisTab({ qualities, entries }) {
           />
         </>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3">
+        <div className="bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5 space-y-3">
           <p className="text-sm font-semibold text-gray-500">All qualities</p>
           <BreakdownTable
             columnLabel="Quality Name"

@@ -1,4 +1,4 @@
-BANSI FASHION APP - CLOUDFLARE PAGES (second host, deploys from Git)
+ANOKHI FABRICS APP - CLOUDFLARE PAGES (second host, deploys from Git)
 ====================================================================
 
 Netlify stays exactly as it is. Both hosts build from the same GitHub repo

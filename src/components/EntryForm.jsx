@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
 import DateField from "./DateField";
 import QualitySelect from "./QualitySelect";
-import ColourInput from "./ColourInput";
+import ColourInput, { colourError } from "./ColourInput";
+import { isApcColour, apcText as stripApc, makeApcColour } from "../data/apc";
 import { appendEntry } from "../api/sheetApi";
 
 const MODE_CONFIG = {
-  Inward: { refField: "LotNo", refLabel: "Lot No." },
+  // Inward's extra column is an optional "Remarks" box. The sheet column is still
+  // called LotNo, so the Google Sheet / Apps Script need no change.
+  Inward: { refField: "LotNo", refLabel: "Remarks", optional: true },
   Outward: { refField: "ChallanNo", refLabel: "Challan No." },
 };
 
@@ -16,12 +19,14 @@ function toSheetDate(date) {
   return `${y}-${m}-${d}`;
 }
 
-export default function EntryForm({ mode, qualities, addQuality, showToast }) {
+export default function EntryForm({ mode, qualities, addQuality, showToast, rows = [], onApcSaved }) {
   const config = MODE_CONFIG[mode];
   const [date, setDate] = useState(new Date());
   const [qualityName, setQualityName] = useState("");
   const [colourNo, setColourNo] = useState("");
   const [meter, setMeter] = useState("");
+  const [apcMode, setApcMode] = useState(false);
+  const [apcText, setApcText] = useState("");
   const [refValue, setRefValue] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -30,11 +35,29 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
     [qualities, qualityName]
   );
 
-  const isValid = date && qualityName && colourNo !== "" && meter !== "" && refValue.trim() !== "";
+  // APC remarks already saved for this quality (Inward or Outward), shown for quick re-use.
+  const apcSuggestions = useMemo(() => {
+    const seen = new Map();
+    for (const r of rows) {
+      if (r.QualityName === qualityName && isApcColour(r.ColourNo)) {
+        const t = stripApc(r.ColourNo);
+        if (t && !seen.has(t.toLowerCase())) seen.set(t.toLowerCase(), t);
+      }
+    }
+    return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+  }, [rows, qualityName]);
+
+  const colourOk = apcMode
+    ? apcText.trim() !== ""
+    : colourNo !== "" && !colourError(selectedQuality, colourNo);
+  const refOk = config.optional || refValue.trim() !== "";
+  const isValid = date && qualityName && colourOk && meter !== "" && refOk;
 
   function resetFieldsAfterSubmit() {
     setQualityName("");
     setColourNo("");
+    setApcMode(false);
+    setApcText("");
     setMeter("");
     setRefValue("");
     // date is kept, since consecutive entries are usually the same day
@@ -47,7 +70,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
     const row = {
       Date: toSheetDate(date),
       QualityName: qualityName,
-      ColourNo: colourNo,
+      ColourNo: apcMode ? makeApcColour(apcText) : colourNo,
       Meter: meter,
       [config.refField]: refValue.trim(),
     };
@@ -56,13 +79,14 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
     // be typed right away. The actual save to the sheet happens in the
     // background; only surface a toast if it turns out to have failed.
     showToast(`${mode} Entry Done`, "success");
+    if (apcMode) onApcSaved?.(qualityName, row.ColourNo);
     resetFieldsAfterSubmit();
     setSaving(true);
     setTimeout(() => setSaving(false), 400); // brief guard against a double-tap
 
     appendEntry(mode, row).catch((err) => {
       showToast(
-        `Could not save ${mode.toLowerCase()} entry (${config.refLabel} ${row[config.refField]}) — ${
+        `Could not save ${mode.toLowerCase()} entry (${row.QualityName} ${row.ColourNo}) — ${
           err.message || "check your connection"
         }`,
         "error"
@@ -71,7 +95,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-3xl shadow-xl shadow-brand/10 border border-brand/10 p-5">
       <DateField value={date} onChange={setDate} />
 
       <QualitySelect
@@ -80,40 +104,54 @@ export default function EntryForm({ mode, qualities, addQuality, showToast }) {
         onChange={(name) => {
           setQualityName(name);
           setColourNo("");
+          setApcMode(false);
+          setApcText("");
         }}
         onAddQuality={addQuality}
         showToast={showToast}
       />
 
-      <ColourInput quality={selectedQuality} value={colourNo} onChange={setColourNo} />
+      <ColourInput
+        quality={selectedQuality}
+        value={colourNo}
+        onChange={setColourNo}
+        apcMode={apcMode}
+        onApcMode={setApcMode}
+        apcText={apcText}
+        onApcText={setApcText}
+        apcSuggestions={apcSuggestions}
+      />
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Meter</label>
+        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Meter</label>
         <input
           type="number"
           step="0.01"
           inputMode="decimal"
           value={meter}
           onChange={(e) => setMeter(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+          className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">{config.refLabel}</label>
+        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+          {config.refLabel}
+          {config.optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
+        </label>
         <input
           type="text"
-          inputMode="numeric"
+          inputMode={config.optional ? "text" : "numeric"}
           value={refValue}
           onChange={(e) => setRefValue(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+          className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
         />
       </div>
 
       <button
         type="submit"
         disabled={!isValid || saving}
-        className="w-full rounded-lg bg-brand py-3 font-bold text-white text-base hover:bg-brand-dark disabled:opacity-50 transition-colors"
+        className="w-full rounded-xl bg-gradient-to-r from-brand to-brand-dark py-3.5 font-bold text-white text-base shadow-lg shadow-brand/30 active:scale-[0.99] disabled:opacity-40 disabled:shadow-none transition-all"
       >
         Add {mode} Entry
       </button>

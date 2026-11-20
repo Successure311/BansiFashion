@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { sheetReadMany, sheetSummary } from "../api/sheetApi";
 
 const POLL_INTERVAL_MS = 8000;
-const CACHE_KEY = "bansi_summary_cache_v2";
+const CACHE_KEY = "anokhi_summary_cache_v2";
 
 // Rows are pre-added totals: { QualityName, ColourNo, Inward, Outward }.
 function normaliseSummary(rows) {

@@ -27,7 +27,7 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
       <select
         value={value || ""}
         onChange={handleSelect}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+        className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
       >
         <option value="">
           Select quality…

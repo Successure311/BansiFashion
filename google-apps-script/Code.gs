@@ -1,5 +1,5 @@
 /**
- * Bansi Fashion — Google Sheets backend.
+ * Anokhi Fabrics — Google Sheets backend.
  *
  * SETUP:
  * 1. Create a new Google Sheet.

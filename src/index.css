@@ -2,9 +2,11 @@
 @import "react-datepicker/dist/react-datepicker.css";
 
 @theme {
-  --color-brand: #a3123a;
-  --color-brand-dark: #7a0e2c;
-  --color-brand-light: #fdecf0;
+  --color-brand: #8e2466;
+  --color-gold: #f0b94d;
+  --color-surface: #fbf5f8;
+  --color-brand-dark: #5f1749;
+  --color-brand-light: #f9e8f2;
 }
 
 html,
@@ -17,7 +19,9 @@ body {
 }
 
 body {
-  background-color: #f7f3f4;
+  background: linear-gradient(180deg, #f6e9f1 0%, #fbf5f8 220px);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 /* Style react-datepicker to match the app theme */

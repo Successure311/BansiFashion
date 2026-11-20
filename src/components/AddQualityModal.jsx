@@ -31,7 +31,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-5">
         <h3 className="text-lg font-bold text-gray-800 mb-4">Add New Quality</h3>
         {/* Not a <form>: this modal renders inside the Inward/Outward <form>,
             and a nested <form> would let its submit event bubble into the
@@ -45,7 +45,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder='e.g. PURE MUL CHANDERI 56"'
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+              className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -57,7 +57,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
                 type="number"
                 value={start}
                 onChange={(e) => setStart(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+                className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
               />
             </div>
             <div>
@@ -68,7 +68,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
                 type="number"
                 value={end}
                 onChange={(e) => setEnd(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+                className="w-full rounded-xl border border-gray-200 px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
               />
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
               type="button"
               onClick={handleSave}
               disabled={!isValid || saving}
-              className="flex-1 rounded-lg bg-brand py-2.5 font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+              className="flex-1 rounded-xl bg-brand py-3 font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
             </button>

@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
 echo ===================================
-echo  Bansi Fashion - Deploy via Git
+echo  Anokhi Fabrics - Deploy via Git
 echo ===================================
 echo.
 
@@ -29,7 +29,7 @@ echo.
 
 set MSG=
 set /p MSG="Commit message (leave blank for default): "
-if "%MSG%"=="" set MSG=Update Bansi Fashion app
+if "%MSG%"=="" set MSG=Update Anokhi Fabrics app
 
 git add -A
 git commit -m "%MSG%"
