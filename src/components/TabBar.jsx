@@ -12,7 +12,7 @@ export default function TabBar({ active, onChange }) {
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-3 rounded-xl font-display text-[1.05rem] font-bold transition-all flex items-center justify-center gap-1.5 ${
               active === tab.id
                 ? "tab-active text-white"
                 : "text-gray-500 hover:text-brand"
