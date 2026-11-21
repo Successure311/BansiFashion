@@ -39,7 +39,7 @@ export default function ColourInput({
   const wrapRef = useRef(null);
 
   // Keyboard: Left/Right switch between "Colour number" and "APC"; Enter/Space on a
-  // toggle (or a tap/click on it) jumps into the colour box so typing can start at once.
+  // toggle (a click with detail 0) jumps into the colour box so typing can continue.
   function focusColourBox() {
     setTimeout(() => wrapRef.current?.querySelector('[data-field="colour"]')?.focus(), 60);
   }
@@ -76,9 +76,9 @@ export default function ColourInput({
             aria-checked={apcMode === o.id}
             disabled={!quality}
             onKeyDown={(e) => onToggleKey(e, index)}
-            onClick={() => {
+            onClick={(e) => {
               onApcMode(o.id);
-              focusColourBox(); // ready to type right after choosing
+              if (e.detail === 0) focusColourBox();
             }}
             className={`py-2 rounded-lg text-sm font-bold transition-all disabled:opacity-50 ${
               apcMode === o.id ? "bg-white text-brand shadow" : "text-gray-500"
