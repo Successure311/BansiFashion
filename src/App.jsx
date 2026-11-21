@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import Header from "./components/Header";
 import EntryForm from "./components/EntryForm";
-import AnalysisHub from "./components/AnalysisHub";
+import AnalysisTab from "./components/AnalysisTab";
 import Toast from "./components/Toast";
 import { useQualities } from "./hooks/useQualities";
 import { useEntries } from "./hooks/useEntries";
@@ -34,7 +34,7 @@ export default function App() {
         {activeTab === "Outward" && (
           <EntryForm mode="Outward" qualities={qualities} addQuality={addQuality} showToast={showToast} rows={entryRows} onApcSaved={onApcSaved} />
         )}
-        {activeTab === "Analysis" && <AnalysisHub qualities={qualities} entries={entries} onRangeChange={setRange} />}
+        {activeTab === "Analysis" && <AnalysisTab qualities={qualities} entries={entries} onRangeChange={setRange} />}
       </main>
 
       <Toast toast={toast} onDismiss={dismiss} />

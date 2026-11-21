@@ -7,7 +7,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
   </StrictMode>,
-)
+);
 
 // iOS Safari ignores user-scalable=no; block its pinch gesture explicitly.
 ["gesturestart", "gesturechange", "gestureend"].forEach((type) =>
