@@ -2,8 +2,8 @@
 @import "react-datepicker/dist/react-datepicker.css";
 
 @theme {
-  --font-display: "Playfair Display", Georgia, serif;
-  --font-sans: "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "IBM Plex Serif", Georgia, serif;
+  --font-sans: "IBM Plex Serif", Georgia, serif;
   --color-brand: #8e2466;
   --color-gold: #f0b94d;
   --color-surface: #fbf5f8;
@@ -21,7 +21,7 @@ body {
 }
 
 body {
-  font-weight: 300;
+  font-weight: 400;
   background: linear-gradient(180deg, #f6e9f1 0%, #fbf5f8 220px);
   background-attachment: fixed;
   min-height: 100vh;
@@ -180,7 +180,7 @@ body {
   border-radius: 1rem !important;
   background: linear-gradient(180deg, #fbf6f9, #ffffff) !important;
   min-height: 3.2rem;
-  font-weight: 300;
+  font-weight: 400;
   font-size: 1.05rem;
 }
 .field::placeholder {
@@ -210,5 +210,5 @@ body {
 
 /* Entered values, dropdown options and suggestion lists: normal (light) weight. */
 input, select, option, textarea, li {
-  font-weight: 300;
+  font-weight: 400;
 }
