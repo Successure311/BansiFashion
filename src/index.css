@@ -3,7 +3,7 @@
 
 @theme {
   --font-display: "Playfair Display", Georgia, serif;
-  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Oswald", ui-sans-serif, system-ui, sans-serif;
   --color-brand: #8e2466;
   --color-gold: #f0b94d;
   --color-surface: #fbf5f8;
@@ -21,7 +21,7 @@ body {
 }
 
 body {
-  font-weight: 500;
+  font-weight: 400;
   background: linear-gradient(180deg, #f6e9f1 0%, #fbf5f8 220px);
   background-attachment: fixed;
   min-height: 100vh;
@@ -140,9 +140,9 @@ body {
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.45rem;
-  font-size: 0.88rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-brand-dark);
 }
@@ -180,7 +180,8 @@ body {
   border-radius: 1rem !important;
   background: linear-gradient(180deg, #fbf6f9, #ffffff) !important;
   min-height: 3.2rem;
-  font-weight: 500;
+  font-weight: 400;
+  font-size: 1.05rem;
 }
 .field::placeholder {
   color: #b9a8b2;
@@ -201,7 +202,7 @@ body {
 /* Bracketed hints inside a title: clearly smaller and lighter than the title. */
 .lbl span {
   font-size: 0.66rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.03em;
   text-transform: none;
   color: #9a8a94;
