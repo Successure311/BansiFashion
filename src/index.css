@@ -3,7 +3,7 @@
 
 @theme {
   --font-display: "Playfair Display", Georgia, serif;
-  --font-sans: "Playfair Display", Georgia, serif;
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --color-brand: #8e2466;
   --color-gold: #f0b94d;
   --color-surface: #fbf5f8;
@@ -21,6 +21,7 @@ body {
 }
 
 body {
+  font-weight: 500;
   background: linear-gradient(180deg, #f6e9f1 0%, #fbf5f8 220px);
   background-attachment: fixed;
   min-height: 100vh;
