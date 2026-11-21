@@ -3,6 +3,7 @@ import SummaryCards from "./SummaryCards";
 import BreakdownTable from "./BreakdownTable";
 import ColourSearch from "./ColourSearch";
 import DateFilter from "./DateFilter";
+import ExportButton from "./ExportButton";
 import { buildRange } from "../data/dates";
 
 
@@ -155,6 +156,8 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
           />
         </div>
       )}
+
+      <ExportButton range={buildRange(dateMode, d1, d2)} quality={qualityName} colour={colourNo} />
     </div>
   );
 }

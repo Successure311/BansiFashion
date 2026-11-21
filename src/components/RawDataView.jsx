@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import DateFilter from "./DateFilter";
+import ExportButton from "./ExportButton";
 import { useDateFilter } from "../hooks/useDateFilter";
 import { colourSort, formatDisplayDate, inRange, sumMeters } from "../data/analytics";
 
@@ -95,6 +96,8 @@ export default function RawDataView({ kind, rows, qualities, loading, error, onR
           </p>
         )}
       </div>
+
+      <ExportButton range={dates.range} quality={quality} />
     </div>
   );
 }
