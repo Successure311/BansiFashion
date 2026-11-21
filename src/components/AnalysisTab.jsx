@@ -77,6 +77,8 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
   function selectQuality(name) {
     setQualityName(name);
     setColourNo("");
+    // Dates only apply once a quality is picked; back to all qualities = all dates.
+    if (!name && dateMode !== "all") applyDates("all", d1, d2);
   }
 
   return (
@@ -95,32 +97,6 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="grid grid-cols-1 gap-3">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date</label>
-            <div className="grid grid-cols-3 gap-1.5 bg-brand-light rounded-xl p-1">
-              {DATE_MODES.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => applyDates(m.id, d1, d2)}
-                  className={`py-2 rounded-lg text-xs font-bold transition-all ${
-                    dateMode === m.id ? "bg-white text-brand shadow" : "text-gray-500"
-                  }`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {dateMode === "single" && (
-            <DateField label="Date" value={d1} onChange={(d) => d && applyDates("single", d, d2)} />
-          )}
-          {dateMode === "range" && (
-            <div className="grid grid-cols-2 gap-3">
-              <DateField label="From" value={d1} onChange={(d) => d && applyDates("range", d, d2)} />
-              <DateField label="To" value={d2} onChange={(d) => d && applyDates("range", d1, d)} />
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Quality Name</label>
@@ -150,6 +126,36 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
                 onChange={setColourNo}
               />
             </div>
+          )}
+          {qualityName && (
+            <>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date</label>
+              <div className="grid grid-cols-3 gap-1.5 bg-brand-light rounded-xl p-1">
+                {DATE_MODES.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => applyDates(m.id, d1, d2)}
+                    className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      dateMode === m.id ? "bg-white text-brand shadow" : "text-gray-500"
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {dateMode === "single" && (
+              <DateField label="Date" value={d1} onChange={(d) => d && applyDates("single", d, d2)} />
+            )}
+            {dateMode === "range" && (
+              <div className="grid grid-cols-2 gap-3">
+                <DateField label="From" value={d1} onChange={(d) => d && applyDates("range", d, d2)} />
+                <DateField label="To" value={d2} onChange={(d) => d && applyDates("range", d1, d)} />
+              </div>
+            )}
+            </>
           )}
         </div>
       </div>
