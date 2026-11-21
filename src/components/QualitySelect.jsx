@@ -33,7 +33,7 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
     setText(null);
     inputRef.current?.blur();
     if (item.other) {
-      setNewName((text ?? "").trim());
+      setNewName(""); // always open an empty box, not the text typed to search
       setModalOpen(true);
       return;
     }
