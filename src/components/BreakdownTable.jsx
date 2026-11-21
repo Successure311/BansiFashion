@@ -8,7 +8,7 @@ export default function BreakdownTable({ columnLabel, rows, activeKey, onRowClic
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-100">
+    <div className="overflow-x-auto rounded-xl table-accent">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wide">

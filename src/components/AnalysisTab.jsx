@@ -83,7 +83,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
 
   return (
     <div className="space-y-5">
-      <div className="surface-card rounded-3xl p-5 space-y-4">
+      <div className="surface-card card-accent rounded-3xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-gray-800">Analysis</h2>
           <button
@@ -167,7 +167,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
             totalOutward={summaryOutward}
             label={colourNo ? `${qualityName} — Colour ${colourNo}` : qualityName}
           />
-          <div className="surface-card rounded-3xl p-5 space-y-3">
+          <div className="surface-card card-accent rounded-3xl p-5 space-y-3">
             <p className="text-sm font-semibold text-gray-500">Colour-wise</p>
             <BreakdownTable
               columnLabel="Colour No."
@@ -177,7 +177,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
           </div>
         </>
       ) : (
-        <div className="surface-card rounded-3xl p-5 space-y-3">
+        <div className="surface-card card-accent rounded-3xl p-5 space-y-3">
           <p className="text-sm font-semibold text-gray-500">All qualities</p>
           <BreakdownTable
             columnLabel="Quality Name"
