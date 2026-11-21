@@ -47,7 +47,7 @@ export default function ColourInput({
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+      <label className="lbl">
         Colour No.
         {hasRange && !apcMode && (
           <span className="ml-1.5 text-xs font-medium text-brand/70">

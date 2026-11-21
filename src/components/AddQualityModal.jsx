@@ -38,7 +38,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
             outer form's handler instead of firing a save here. */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Quality Name</label>
+            <label className="lbl">Quality Name</label>
             <input
               autoFocus
               type="text"
@@ -50,7 +50,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
+              <label className="lbl">
                 Range Start <span className="font-normal text-gray-400">(optional)</span>
               </label>
               <input
@@ -61,7 +61,7 @@ export default function AddQualityModal({ onClose, onAdd }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
+              <label className="lbl">
                 Range End <span className="font-normal text-gray-400">(optional)</span>
               </label>
               <input

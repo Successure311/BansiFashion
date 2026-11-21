@@ -23,7 +23,7 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1">Quality Name</label>
+      <label className="lbl">Quality Name</label>
       <select
         value={value || ""}
         onChange={handleSelect}

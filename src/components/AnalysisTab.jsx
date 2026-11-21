@@ -99,7 +99,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
         <div className="grid grid-cols-1 gap-3">
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Quality Name</label>
+            <label className="lbl">Quality Name</label>
             <select
               value={qualityName}
               onChange={(e) => selectQuality(e.target.value)}
@@ -116,7 +116,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
 
           {qualityName && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
+              <label className="lbl">
                 Colour No. (optional)
               </label>
               <ColourSearch
@@ -130,7 +130,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
           {qualityName && (
             <>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date</label>
+              <label className="lbl">Date</label>
               <div className="grid grid-cols-3 gap-1.5 bg-brand-light rounded-xl p-1">
                 {DATE_MODES.map((m) => (
                   <button

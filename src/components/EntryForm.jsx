@@ -98,7 +98,15 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 surface-card rounded-3xl p-5">
+    <form onSubmit={handleSubmit} className="space-y-4 surface-card card-accent rounded-3xl p-5 pt-6">
+      <div>
+        <h2 className="form-title">{mode} Entry</h2>
+        <p className="form-sub">
+          {mode === "Inward" ? "Record fabric received into stock" : "Record fabric sent out of stock"}
+        </p>
+        <div className="orn" aria-hidden>◆</div>
+      </div>
+
       <DateField value={date} onChange={setDate} />
 
       <QualitySelect
@@ -126,7 +134,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
       />
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Meter</label>
+        <label className="lbl">Meter</label>
         <input
           type="number"
           step="0.01"
@@ -138,7 +146,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+        <label className="lbl">
           {config.refLabel}
           {config.optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
         </label>
@@ -156,7 +164,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
         disabled={!isValid || saving}
         className="w-full btn-primary py-3.5 font-bold text-white text-base"
       >
-        Add {mode} Entry
+        Add {mode} Entry  →
       </button>
     </form>
   );

@@ -2,6 +2,8 @@
 @import "react-datepicker/dist/react-datepicker.css";
 
 @theme {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --color-brand: #8e2466;
   --color-gold: #f0b94d;
   --color-surface: #fbf5f8;
@@ -129,4 +131,86 @@ body {
 
 .app-header {
   box-shadow: 0 2px 4px rgba(60, 10, 45, 0.25), 0 10px 24px rgba(60, 10, 45, 0.3);
+}
+
+/* ---- Fashion-app entry form ---- */
+.lbl {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-brand-dark);
+}
+.lbl::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  transform: rotate(45deg);
+  background: var(--color-gold);
+  border-radius: 1px;
+}
+
+.card-accent {
+  position: relative;
+  overflow: hidden;
+}
+.card-accent::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--color-brand-dark), var(--color-brand), var(--color-gold), var(--color-brand));
+}
+
+.form-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: var(--color-brand-dark);
+}
+.form-sub {
+  font-size: 0.8rem;
+  color: #8b7a85;
+  margin-top: 0.25rem;
+}
+.orn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.9rem 0 0.2rem;
+  color: var(--color-gold);
+  font-size: 0.7rem;
+}
+.orn::before,
+.orn::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(142, 36, 102, 0.3), transparent);
+}
+
+.field {
+  border-radius: 1rem !important;
+  background: linear-gradient(180deg, #fbf6f9, #ffffff) !important;
+  min-height: 3.2rem;
+  font-weight: 500;
+}
+.field::placeholder {
+  color: #b9a8b2;
+  font-weight: 400;
+}
+
+.btn-primary {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.9rem !important;
+}
+.field:disabled {
+  background: #f1eef0 !important;
+  color: #b9a8b2;
+  box-shadow: none;
 }
