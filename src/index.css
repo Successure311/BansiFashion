@@ -145,14 +145,6 @@ body {
   text-transform: uppercase;
   color: var(--color-brand-dark);
 }
-.lbl::before {
-  content: "";
-  width: 0.4rem;
-  height: 0.4rem;
-  transform: rotate(45deg);
-  background: var(--color-gold);
-  border-radius: 1px;
-}
 
 .card-accent {
   position: relative;
@@ -178,18 +170,8 @@ body {
   margin-top: 0.25rem;
 }
 .orn {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin: 0.9rem 0 0.2rem;
-  color: var(--color-gold);
-  font-size: 0.7rem;
-}
-.orn::before,
-.orn::after {
-  content: "";
-  flex: 1;
   height: 1px;
+  margin: 0.9rem 0 0.2rem;
   background: linear-gradient(90deg, transparent, rgba(142, 36, 102, 0.3), transparent);
 }
 

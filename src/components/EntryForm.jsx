@@ -104,7 +104,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
         <p className="form-sub">
           {mode === "Inward" ? "Record fabric received into stock" : "Record fabric sent out of stock"}
         </p>
-        <div className="orn" aria-hidden>◆</div>
+        <div className="orn" aria-hidden />
       </div>
 
       <DateField value={date} onChange={setDate} />
