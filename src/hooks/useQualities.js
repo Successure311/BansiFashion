@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { sheetRead, upsertQuality } from "../api/sheetApi";
+import { sheetRead, appendQualityRow } from "../api/sheetApi";
 import { defaultQualities } from "../data/defaultQualities";
 
 const POLL_INTERVAL_MS = 8000;
@@ -11,14 +11,24 @@ function toRangeNumber(v) {
   return Number.isFinite(n) ? n : null;
 }
 
+const sameRange = (a, b) => a.start === b.start && a.end === b.end;
+
+// One sheet row per range -> one quality with all its ranges.
 function normaliseRows(rows) {
-  return rows
-    .filter((r) => r.QualityName)
-    .map((r) => ({
-      name: String(r.QualityName).trim(),
-      start: toRangeNumber(r.RangeStart),
-      end: toRangeNumber(r.RangeEnd),
-    }));
+  const map = new Map();
+  for (const r of rows) {
+    if (!r.QualityName) continue;
+    const name = String(r.QualityName).trim();
+    const key = name.toLowerCase();
+    const q = map.get(key) || { name, ranges: [] };
+    const start = toRangeNumber(r.RangeStart);
+    const end = toRangeNumber(r.RangeEnd);
+    if (start !== null && end !== null && end >= start && !q.ranges.some((x) => sameRange(x, { start, end }))) {
+      q.ranges.push({ start, end });
+    }
+    map.set(key, q);
+  }
+  return Array.from(map.values());
 }
 
 function mergeByName(base, overrides) {
@@ -32,6 +42,11 @@ export function useQualities() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const inFlight = useRef(false);
+  const latest = useRef(qualities);
+
+  useEffect(() => {
+    latest.current = qualities;
+  }, [qualities]);
 
   const load = useCallback(async (silent = false) => {
     if (inFlight.current) return;
@@ -57,14 +72,26 @@ export function useQualities() {
     return () => clearInterval(interval);
   }, [load]);
 
-  const addQuality = useCallback(async ({ name, start, end }) => {
-    const trimmed = name.trim();
-    await upsertQuality({
-      QualityName: trimmed,
-      RangeStart: start ?? "",
-      RangeEnd: end ?? "",
+  // Add a quality, or add more colour ranges to an existing one. Ranges the
+  // quality already has are skipped; each new range becomes its own sheet row.
+  const addQuality = useCallback(async ({ name, ranges }) => {
+    const typed = name.trim();
+    const existing = latest.current.find((q) => q.name.toLowerCase() === typed.toLowerCase());
+    const trimmed = existing ? existing.name : typed;
+    const fresh = ranges.filter((r) => !(existing && existing.ranges.some((x) => sameRange(x, r))));
+
+    if (fresh.length) {
+      for (const r of fresh) {
+        await appendQualityRow({ QualityName: trimmed, RangeStart: r.start, RangeEnd: r.end });
+      }
+    } else if (!existing) {
+      await appendQualityRow({ QualityName: trimmed, RangeStart: "", RangeEnd: "" });
+    }
+
+    setQualities((prev) => {
+      const cur = prev.find((q) => q.name.toLowerCase() === trimmed.toLowerCase());
+      return mergeByName(prev, [{ name: trimmed, ranges: [...(cur ? cur.ranges : []), ...fresh] }]);
     });
-    setQualities((prev) => mergeByName(prev, [{ name: trimmed, start: start ?? null, end: end ?? null }]));
     return trimmed;
   }, []);
 

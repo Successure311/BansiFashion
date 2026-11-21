@@ -55,5 +55,5 @@ export async function sheetPost(payload) {
 
 export const appendEntry = (sheet, row) => sheetPost({ sheet, row });
 
-export const upsertQuality = (row) =>
-  sheetPost({ sheet: "QualityMaster", row, action: "upsert", key_column: "QualityName" });
+// One QualityMaster row per colour range (a quality with several ranges has several rows).
+export const appendQualityRow = (row) => sheetPost({ sheet: "QualityMaster", row });

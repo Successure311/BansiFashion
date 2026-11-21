@@ -1,47 +1,126 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AddQualityModal from "./AddQualityModal";
 
-const OTHER = "__other__";
-
-export default function QualitySelect({ qualities, value, onChange, onAddQuality, showToast }) {
+// Searchable quality picker: type to filter, Up/Down to move, Enter to pick.
+// If only one quality matches what is typed, Enter picks it straight away.
+export default function QualitySelect({ qualities, value, onChange, onAddQuality, showToast, onPicked }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [text, setText] = useState(null); // null = show the selected quality
+  const [open, setOpen] = useState(false);
+  const [hi, setHi] = useState(-1);
+  const inputRef = useRef(null);
+  const listRef = useRef(null);
 
-  function handleSelect(e) {
-    if (e.target.value === OTHER) {
+  const query = (text ?? "").trim().toLowerCase();
+  const matches = useMemo(() => {
+    const words = query.split(/\s+/).filter(Boolean);
+    return words.length
+      ? qualities.filter((q) => words.every((w) => q.name.toLowerCase().includes(w)))
+      : qualities;
+  }, [qualities, query]);
+  // The list: matching qualities, then the "add new" entry.
+  const items = useMemo(() => [...matches.map((q) => ({ name: q.name })), { other: true }], [matches]);
+
+  useEffect(() => {
+    if (open && hi >= 0) listRef.current?.children[hi]?.scrollIntoView({ block: "nearest" });
+  }, [hi, open]);
+
+  function pick(item) {
+    setOpen(false);
+    setText(null);
+    inputRef.current?.blur();
+    if (item.other) {
+      setNewName((text ?? "").trim());
       setModalOpen(true);
       return;
     }
-    onChange(e.target.value);
+    onChange(item.name);
+    onPicked?.();
   }
 
-  async function handleAdd({ name, start, end }) {
-    const savedName = await onAddQuality({ name, start, end });
+  function onKeyDown(e) {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      setOpen(true);
+      const n = items.length;
+      setHi((h) => (e.key === "ArrowDown" ? (h + 1) % n : (h - 1 + n) % n));
+    } else if (e.key === "Enter") {
+      e.preventDefault(); // handled here; the form must not also react
+      if (query && matches.length === 1) pick(items[0]);
+      else if (hi >= 0 && items[hi]) pick(items[hi]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  }
+
+  async function handleAdd({ name, ranges }) {
+    const savedName = await onAddQuality({ name, ranges });
     onChange(savedName);
     setModalOpen(false);
-    showToast?.(`Added new quality "${savedName}"`, "success");
+    showToast?.(`Saved quality "${savedName}"`, "success");
+    onPicked?.();
   }
 
   return (
     <div>
       <label className="lbl">Quality Name</label>
-      <select
-        value={value || ""}
-        onChange={handleSelect}
-        className="w-full field rounded-xl border border-gray-200 px-3.5 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
-      >
-        <option value="">
-          Select quality…
-        </option>
-        {qualities.map((q) => (
-          <option key={q.name} value={q.name}>
-            {q.name}
-          </option>
-        ))}
-        <option value={OTHER}>Other… (add new quality)</option>
-      </select>
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          data-field="quality"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          value={text ?? value}
+          placeholder="Select quality…"
+          onFocus={(e) => {
+            setOpen(true);
+            setHi(-1);
+            e.target.select();
+          }}
+          onClick={() => setOpen(true)}
+          onBlur={() =>
+            setTimeout(() => {
+              setOpen(false);
+              setText(null);
+            }, 150)
+          }
+          onChange={(e) => {
+            setText(e.target.value);
+            setHi(e.target.value.trim() ? 0 : -1);
+            setOpen(true);
+          }}
+          onKeyDown={onKeyDown}
+          className="w-full field rounded-xl border border-gray-200 px-3.5 py-3 pr-10 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+        />
+        <span aria-hidden className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-brand text-xs">
+          ▼
+        </span>
+        {open && (
+          <ul
+            ref={listRef}
+            className="absolute z-30 left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg"
+          >
+            {items.map((it, i) => (
+              <li
+                key={it.other ? "__other__" : it.name}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => pick(it)}
+                className={`px-3.5 py-2.5 text-base cursor-pointer active:bg-brand-light ${
+                  i === hi ? "bg-brand-light" : ""
+                } ${it.other ? "text-brand border-t border-gray-100" : it.name === value ? "text-brand" : "text-gray-800"}`}
+              >
+                {it.other ? "Other… (add new quality / colour range)" : it.name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {modalOpen && (
-        <AddQualityModal onClose={() => setModalOpen(false)} onAdd={handleAdd} />
+        <AddQualityModal initialName={newName} onClose={() => setModalOpen(false)} onAdd={handleAdd} />
       )}
     </div>
   );

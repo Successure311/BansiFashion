@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import DateField from "./DateField";
 import QualitySelect from "./QualitySelect";
 import ColourInput, { colourError } from "./ColourInput";
@@ -19,6 +19,9 @@ function toSheetDate(date) {
   return `${y}-${m}-${d}`;
 }
 
+// Enter moves to the next field; Enter on the last field saves the entry.
+const NEXT_FIELD = { colour: "meter", meter: "ref" };
+
 export default function EntryForm({ mode, qualities, addQuality, showToast, rows = [], onApcSaved }) {
   const config = MODE_CONFIG[mode];
   const [date, setDate] = useState(new Date());
@@ -29,6 +32,11 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
   const [apcText, setApcText] = useState("");
   const [refValue, setRefValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const formRef = useRef(null);
+
+  function focusField(name) {
+    formRef.current?.querySelector(`[data-field="${name}"]`)?.focus();
+  }
 
   const selectedQuality = useMemo(
     () => qualities.find((q) => q.name === qualityName) || null,
@@ -63,6 +71,18 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
     // date is kept, since consecutive entries are usually the same day
   }
 
+  function handleKeyDown(e) {
+    if (e.key !== "Enter" || e.defaultPrevented || e.target.tagName !== "INPUT") return;
+    const field = e.target.dataset.field;
+    if (!field) return;
+    e.preventDefault();
+    if (field === "ref") {
+      if (isValid && !saving) formRef.current?.requestSubmit();
+    } else if (NEXT_FIELD[field]) {
+      focusField(NEXT_FIELD[field]);
+    }
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!isValid || saving) return;
@@ -84,6 +104,8 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
     showToast(`${mode} Entry Done`, "success");
     if (apcMode) onApcSaved?.(qualityName, row.ColourNo);
     resetFieldsAfterSubmit();
+    // On a laptop, go straight back to the quality box for the next entry.
+    if (window.matchMedia?.("(pointer: fine)").matches) setTimeout(() => focusField("quality"), 0);
     setSaving(true);
     setTimeout(() => setSaving(false), 400); // brief guard against a double-tap
 
@@ -98,7 +120,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 surface-card card-accent rounded-3xl p-5 pt-6">
+    <form ref={formRef} onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4 surface-card card-accent rounded-3xl p-5 pt-6">
       <div>
         <h2 className="form-title">{mode} Entry</h2>
         <p className="form-sub">
@@ -120,6 +142,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
         }}
         onAddQuality={addQuality}
         showToast={showToast}
+        onPicked={() => setTimeout(() => focusField("colour"), 60)}
       />
 
       <ColourInput
@@ -137,6 +160,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
         <label className="lbl">Meter</label>
         <input
           type="number"
+          data-field="meter"
           step="0.01"
           inputMode="decimal"
           value={meter}
@@ -152,6 +176,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
         </label>
         <input
           type="text"
+          data-field="ref"
           inputMode={config.optional ? "text" : "numeric"}
           value={refValue}
           onChange={(e) => setRefValue(e.target.value)}

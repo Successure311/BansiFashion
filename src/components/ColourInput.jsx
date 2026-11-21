@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { colourNumbers, formatRanges, hasRanges, inRanges } from "../data/ranges";
 
 const inputCls =
   "w-full field rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand disabled:bg-gray-100 disabled:text-gray-400";
@@ -8,9 +9,8 @@ export function colourError(quality, value) {
   if (!quality || value === "") return null;
   const n = Number(value);
   if (!Number.isInteger(n)) return "Enter a whole colour number";
-  const hasRange = Number.isFinite(quality.start) && Number.isFinite(quality.end);
-  if (hasRange && (n < quality.start || n > quality.end)) {
-    return `Colour must be between ${quality.start} and ${quality.end}`;
+  if (hasRanges(quality) && !inRanges(quality, n)) {
+    return `Colour must be in ${formatRanges(quality)}`;
   }
   return null;
 }
@@ -28,14 +28,8 @@ export default function ColourInput({
   onApcText,
   apcSuggestions,
 }) {
-  const hasRange = !!quality && Number.isFinite(quality.start) && Number.isFinite(quality.end);
-
-  const options = useMemo(() => {
-    if (!hasRange || quality.end < quality.start) return [];
-    const list = [];
-    for (let n = quality.start; n <= quality.end; n++) list.push(n);
-    return list;
-  }, [hasRange, quality]);
+  const hasRange = hasRanges(quality);
+  const options = useMemo(() => (hasRange ? colourNumbers(quality) : []), [hasRange, quality]);
 
   const error = apcMode ? null : colourError(quality, value);
   const [open, setOpen] = useState(false);
@@ -47,13 +41,9 @@ export default function ColourInput({
 
   return (
     <div>
-      <label className="lbl">
+      <label className="lbl flex-wrap">
         Colour No.
-        {hasRange && !apcMode && (
-          <span className="ml-1.5 text-xs font-medium text-brand/70">
-            ({quality.start}–{quality.end})
-          </span>
-        )}
+        {hasRange && !apcMode && <span>({formatRanges(quality)})</span>}
       </label>
 
       <div className="grid grid-cols-2 gap-1.5 bg-brand-light rounded-xl p-1 mb-2">
@@ -79,6 +69,7 @@ export default function ColourInput({
         <div className="relative">
           <input
             type="text"
+            data-field="colour"
             autoComplete="off"
             value={apcText}
             onChange={(e) => {
@@ -114,6 +105,7 @@ export default function ColourInput({
         <>
           <input
             type="number"
+            data-field="colour"
             step="1"
             list={hasRange ? "colour-options" : undefined}
             inputMode="numeric"
