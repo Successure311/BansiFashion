@@ -210,3 +210,32 @@ body {
 input, select, option, textarea, li {
   font-weight: 400;
 }
+
+/* iPhone: keep the header clear of the notch / status bar. */
+.header-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* iPhone: selects clipped their text; draw them ourselves with room for the text. */
+select.field {
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 1.5;
+  height: 3.4rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+  padding-right: 2.6rem;
+  text-overflow: ellipsis;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%238e2466'%3E%3Cpath d='M5.5 7.5 10 12.5l4.5-5z'/%3E%3C/svg%3E") no-repeat right 0.9rem center / 1.2rem,
+    linear-gradient(180deg, #fbf6f9, #ffffff) !important;
+}
+
+/* iPhone: single-line fields and buttons need an explicit line-height so text isn't cut. */
+input.field,
+button.field {
+  line-height: 1.5;
+}
+.lbl {
+  line-height: 1.4;
+}
