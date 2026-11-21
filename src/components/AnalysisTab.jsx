@@ -117,7 +117,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
           {qualityName && (
             <div>
               <label className="lbl">
-                Colour No. <span>(optional)</span>
+                Colour No. (optional)
               </label>
               <ColourSearch
                 key={qualityName}

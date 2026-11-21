@@ -139,9 +139,9 @@ body {
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.45rem;
-  font-size: 0.88rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-brand-dark);
 }
@@ -195,13 +195,4 @@ body {
   background: #f1eef0 !important;
   color: #b9a8b2;
   box-shadow: none;
-}
-
-/* Bracketed hints inside a title: clearly smaller and lighter than the title. */
-.lbl span {
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  text-transform: none;
-  color: #9a8a94;
 }
