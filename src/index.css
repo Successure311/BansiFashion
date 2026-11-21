@@ -210,11 +210,3 @@ body {
 input, select, option, textarea, li {
   font-weight: 400;
 }
-
-/* Same plum -> gold border, thinner, for tables. */
-.table-accent {
-  border: 2px solid transparent;
-  background:
-    linear-gradient(#ffffff, #ffffff) padding-box,
-    linear-gradient(135deg, var(--color-brand-dark), var(--color-brand) 35%, var(--color-gold) 60%, var(--color-brand) 85%, var(--color-brand-dark)) border-box;
-}
