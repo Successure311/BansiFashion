@@ -196,3 +196,11 @@ body {
   color: #b9a8b2;
   box-shadow: none;
 }
+
+/* Bracketed hints inside a title: smaller than the title itself. */
+.lbl span {
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
