@@ -7,7 +7,7 @@ const MARGIN = 40;
 const fmt = (n) => n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
 // Quality name in red as the title, then a fully ruled table:
-// Colour No. | Inward (m) | Outward (m) | Difference (m). One table per quality.
+// Colour No. | Difference (m), everything centred. One table per quality.
 export async function buildPdf({ inward, outward, range }) {
   const { jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
@@ -50,20 +50,15 @@ export async function buildPdf({ inward, outward, range }) {
       y += 14;
     }
 
-    const totalIn = lines.reduce((t, r) => t + r.inward, 0);
-    const totalOut = lines.reduce((t, r) => t + r.outward, 0);
     autoTable(doc, {
       startY: y + 6,
-      head: [["Colour No.", "Inward (m)", "Outward (m)", "Difference (m)"]],
-      body: lines.map((r) => [r.ColourNo, fmt(r.inward), fmt(r.outward), fmt(r.inward - r.outward)]),
-      foot: [["Total", fmt(totalIn), fmt(totalOut), fmt(totalIn - totalOut)]],
-      showFoot: "lastPage",
+      head: [["Colour No.", "Difference (m)"]],
+      body: lines.map((r) => [r.ColourNo, fmt(r.inward - r.outward)]),
       theme: "grid",
+      tableWidth: 300,
       margin: { left: MARGIN, right: MARGIN, top: MARGIN, bottom: MARGIN },
-      styles: { font: "helvetica", fontSize: 10, textColor: BLACK, lineColor: BLACK, lineWidth: 0.7, cellPadding: 6, halign: "right" },
+      styles: { font: "helvetica", fontSize: 10, textColor: BLACK, lineColor: BLACK, lineWidth: 0.7, cellPadding: 6, halign: "center", valign: "middle" },
       headStyles: { fillColor: [255, 255, 255], textColor: BLACK, fontStyle: "bold", halign: "center" },
-      footStyles: { fillColor: [255, 255, 255], textColor: BLACK, fontStyle: "bold" },
-      columnStyles: { 0: { halign: "left" } },
     });
     y = doc.lastAutoTable.finalY + 30;
   }

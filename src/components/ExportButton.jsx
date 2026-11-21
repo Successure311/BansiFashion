@@ -48,7 +48,7 @@ export default function ExportButton({ range, quality = "", colour = "" }) {
         {busy ? "Preparing report…" : "Export Report  ↓"}
       </button>
       <p className="text-xs text-gray-400 text-center">
-        Saves a PDF table of colour-wise Inward, Outward and Difference (m) for the filters above.
+        Saves a PDF with the colour-wise Difference (m) table for the filters above.
       </p>
       {message && (
         <p className={`text-sm text-center font-semibold ${message.ok ? "text-emerald-700" : "text-red-600"}`}>
