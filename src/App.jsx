@@ -11,7 +11,8 @@ import { useToast } from "./hooks/useToast";
 export default function App() {
   const [activeTab, setActiveTab] = useState("Inward");
   const { qualities, addQuality } = useQualities();
-  const entries = useEntries(activeTab !== "Inward");
+  const [range, setRange] = useState(null); // Analysis date filter; null = all dates
+  const entries = useEntries(activeTab !== "Inward", range);
   const { toast, showToast, dismiss } = useToast();
 
   // APC remarks saved on this device show up instantly in the suggestions,
@@ -35,7 +36,7 @@ export default function App() {
         {activeTab === "Outward" && (
           <EntryForm mode="Outward" qualities={qualities} addQuality={addQuality} showToast={showToast} rows={entryRows} onApcSaved={onApcSaved} />
         )}
-        {activeTab === "Analysis" && <AnalysisTab qualities={qualities} entries={entries} />}
+        {activeTab === "Analysis" && <AnalysisTab qualities={qualities} entries={entries} onRangeChange={setRange} />}
       </main>
 
       <Toast toast={toast} onDismiss={dismiss} />

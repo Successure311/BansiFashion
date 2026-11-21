@@ -93,21 +93,28 @@ function upsertRow_(name, rowObj, keyColumn) {
 var SUMMARY_CACHE_KEY = 'summary_v1';
 var SUMMARY_CACHE_SECONDS = 30;
 
-function buildSummary_() {
+// from/to (yyyy-MM-dd, inclusive) are optional; both empty = all dates.
+function buildSummary_(from, to) {
   var totals = {};
+  var tz = Session.getScriptTimeZone();
   ['Inward', 'Outward'].forEach(function (name) {
     var sh = getSheet_(name);
     var last = sh.getLastRow();
     if (last < 2) return;
-    // Columns B..D = QualityName, ColourNo, Meter (see SCHEMA).
-    var values = sh.getRange(2, 2, last - 1, 3).getValues();
+    // Columns A..D = Date, QualityName, ColourNo, Meter (see SCHEMA).
+    var values = sh.getRange(2, 1, last - 1, 4).getValues();
     for (var i = 0; i < values.length; i++) {
-      var q = String(values[i][0]).trim();
+      if (from || to) {
+        var d = values[i][0];
+        var day = d instanceof Date ? Utilities.formatDate(d, tz, 'yyyy-MM-dd') : String(d).trim().slice(0, 10);
+        if ((from && day < from) || (to && day > to)) continue;
+      }
+      var q = String(values[i][1]).trim();
       if (!q) continue;
-      var c = String(values[i][1]).trim();
-      var key = q + '' + c;
+      var c = String(values[i][2]).trim();
+      var key = q + '|' + c;
       var t = totals[key] || (totals[key] = { QualityName: q, ColourNo: c, Inward: 0, Outward: 0 });
-      t[name] += parseFloat(values[i][2]) || 0;
+      t[name] += parseFloat(values[i][3]) || 0;
     }
   });
   return Object.keys(totals).map(function (k) { return totals[k]; });
@@ -132,6 +139,9 @@ function json_(obj) {
 function doGet(e) {
   try {
     var params = e.parameter;
+    if (params.daterange) {
+      return json_(buildSummary_(String(params.from || ''), String(params.to || '')));
+    }
     if (params.summary) return summaryJson_(params.fresh === '1');
     if (params.sheets) {
       var names = params.sheets.split(',');

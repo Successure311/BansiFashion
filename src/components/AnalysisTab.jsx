@@ -2,15 +2,34 @@ import { useMemo, useState } from "react";
 import SummaryCards from "./SummaryCards";
 import BreakdownTable from "./BreakdownTable";
 import ColourSearch from "./ColourSearch";
+import DateField from "./DateField";
+import { buildRange } from "../data/dates";
+
+const DATE_MODES = [
+  { id: "all", label: "All dates" },
+  { id: "single", label: "Single date" },
+  { id: "range", label: "Date range" },
+];
 
 function sumOf(rows, field) {
   return rows.reduce((total, r) => total + r[field], 0);
 }
 
-export default function AnalysisTab({ qualities, entries }) {
+export default function AnalysisTab({ qualities, entries, onRangeChange }) {
   const { rows, loading, error, refresh } = entries;
   const [qualityName, setQualityName] = useState("");
   const [colourNo, setColourNo] = useState("");
+  // No date picked = all dates (the default).
+  const [dateMode, setDateMode] = useState("all");
+  const [d1, setD1] = useState(() => new Date());
+  const [d2, setD2] = useState(() => new Date());
+
+  function applyDates(mode, a, b) {
+    setDateMode(mode);
+    setD1(a);
+    setD2(b);
+    onRangeChange(buildRange(mode, a, b));
+  }
 
   // Default view (no quality picked): every quality's totals at a glance.
   const allQualityRows = useMemo(() => {
@@ -76,6 +95,33 @@ export default function AnalysisTab({ qualities, entries }) {
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="grid grid-cols-1 gap-3">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date</label>
+            <div className="grid grid-cols-3 gap-1.5 bg-brand-light rounded-xl p-1">
+              {DATE_MODES.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => applyDates(m.id, d1, d2)}
+                  className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                    dateMode === m.id ? "bg-white text-brand shadow" : "text-gray-500"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {dateMode === "single" && (
+            <DateField label="Date" value={d1} onChange={(d) => d && applyDates("single", d, d2)} />
+          )}
+          {dateMode === "range" && (
+            <div className="grid grid-cols-2 gap-3">
+              <DateField label="From" value={d1} onChange={(d) => d && applyDates("range", d, d2)} />
+              <DateField label="To" value={d2} onChange={(d) => d && applyDates("range", d1, d)} />
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Quality Name</label>
             <select

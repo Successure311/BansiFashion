@@ -16,10 +16,10 @@ const DateButton = forwardRef(({ value, onClick }, ref) => (
 ));
 DateButton.displayName = "DateButton";
 
-export default function DateField({ value, onChange }) {
+export default function DateField({ value, onChange, label = "Date" }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1">Date</label>
+      <label className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
       <DatePicker
         selected={value}
         onChange={onChange}

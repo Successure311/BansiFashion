@@ -33,6 +33,15 @@ export async function sheetSummary(fresh = false) {
   return data;
 }
 
+// Same totals, limited to a date range (needs the updated Apps Script).
+export async function sheetSummaryRange({ from, to }) {
+  const res = await fetch(`${WEBAPP_URL}?daterange=1&from=${from}&to=${to}`);
+  const data = await readJson(res);
+  if (data && data.error) throw new Error(data.error);
+  if (!Array.isArray(data)) throw new Error("Summary not supported by server");
+  return data;
+}
+
 export async function sheetPost(payload) {
   const res = await fetch(WEBAPP_URL, {
     method: "POST",
