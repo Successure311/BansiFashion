@@ -150,13 +150,11 @@ body {
 .card-accent {
   position: relative;
   overflow: hidden;
-}
-.card-accent::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 5px;
-  background: linear-gradient(90deg, var(--color-brand-dark), var(--color-brand), var(--color-gold), var(--color-brand));
+  /* Full gradient border (plum -> gold -> plum) all the way round. */
+  border: 3px solid transparent;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fffafd 100%) padding-box,
+    linear-gradient(135deg, var(--color-brand-dark), var(--color-brand) 35%, var(--color-gold) 60%, var(--color-brand) 85%, var(--color-brand-dark)) border-box;
 }
 
 .form-title {
