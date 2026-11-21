@@ -33,9 +33,9 @@ export async function sheetSummary(fresh = false) {
   return data;
 }
 
-// Same totals, limited to a date range (needs the updated Apps Script).
-export async function sheetSummaryRange({ from, to }) {
-  const res = await fetch(`${WEBAPP_URL}?daterange=1&from=${from}&to=${to}`);
+// Per-day totals (Date, quality, colour) so the app can filter by date in memory.
+export async function sheetDaily() {
+  const res = await fetch(`${WEBAPP_URL}?daily=1`);
   const data = await readJson(res);
   if (data && data.error) throw new Error(data.error);
   if (!Array.isArray(data)) throw new Error("Summary not supported by server");

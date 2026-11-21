@@ -93,8 +93,9 @@ function upsertRow_(name, rowObj, keyColumn) {
 var SUMMARY_CACHE_KEY = 'summary_v1';
 var SUMMARY_CACHE_SECONDS = 30;
 
-// from/to (yyyy-MM-dd, inclusive) are optional; both empty = all dates.
-function buildSummary_(from, to) {
+// Totals per quality + colour. With byDay=true each row also carries its Date
+// (yyyy-MM-dd) so the app can filter by date range without asking the server again.
+function buildSummary_(byDay) {
   var totals = {};
   var tz = Session.getScriptTimeZone();
   ['Inward', 'Outward'].forEach(function (name) {
@@ -104,16 +105,17 @@ function buildSummary_(from, to) {
     // Columns A..D = Date, QualityName, ColourNo, Meter (see SCHEMA).
     var values = sh.getRange(2, 1, last - 1, 4).getValues();
     for (var i = 0; i < values.length; i++) {
-      if (from || to) {
-        var d = values[i][0];
-        var day = d instanceof Date ? Utilities.formatDate(d, tz, 'yyyy-MM-dd') : String(d).trim().slice(0, 10);
-        if ((from && day < from) || (to && day > to)) continue;
-      }
       var q = String(values[i][1]).trim();
       if (!q) continue;
       var c = String(values[i][2]).trim();
-      var key = q + '|' + c;
+      var day = '';
+      if (byDay) {
+        var d = values[i][0];
+        day = d instanceof Date ? Utilities.formatDate(d, tz, 'yyyy-MM-dd') : String(d).trim().slice(0, 10);
+      }
+      var key = day + '|' + q + '|' + c;
       var t = totals[key] || (totals[key] = { QualityName: q, ColourNo: c, Inward: 0, Outward: 0 });
+      if (byDay) t.Date = day;
       t[name] += parseFloat(values[i][3]) || 0;
     }
   });
@@ -126,7 +128,7 @@ function summaryJson_(fresh) {
     var hit = cache.get(SUMMARY_CACHE_KEY);
     if (hit) return ContentService.createTextOutput(hit).setMimeType(ContentService.MimeType.JSON);
   }
-  var text = JSON.stringify(buildSummary_());
+  var text = JSON.stringify(buildSummary_(false));
   try { cache.put(SUMMARY_CACHE_KEY, text, SUMMARY_CACHE_SECONDS); } catch (e) { /* too big to cache */ }
   return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.JSON);
 }
@@ -139,9 +141,7 @@ function json_(obj) {
 function doGet(e) {
   try {
     var params = e.parameter;
-    if (params.daterange) {
-      return json_(buildSummary_(String(params.from || ''), String(params.to || '')));
-    }
+    if (params.daily) return json_(buildSummary_(true));
     if (params.summary) return summaryJson_(params.fresh === '1');
     if (params.sheets) {
       var names = params.sheets.split(',');
