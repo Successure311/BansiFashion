@@ -1,5 +1,5 @@
 // A quality has one or more colour ranges: { name, ranges: [{ start, end }] }.
-// No ranges = no fixed range (any colour number is accepted).
+// No ranges = no colour numbers allowed (only APC entries).
 export const hasRanges = (q) => !!q && q.ranges.length > 0;
 
 export const inRanges = (q, n) => q.ranges.some((r) => n >= r.start && n <= r.end);

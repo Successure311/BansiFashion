@@ -9,7 +9,9 @@ export function colourError(quality, value) {
   if (!quality || value === "") return null;
   const n = Number(value);
   if (!Number.isInteger(n)) return "Enter a whole colour number";
-  if (hasRanges(quality) && !inRanges(quality, n)) {
+  // Only colours inside a fixed range are allowed; a quality with no range takes APC entries only.
+  if (!hasRanges(quality)) return "No colour range set for this quality — use APC";
+  if (!inRanges(quality, n)) {
     return `Colour must be in ${formatRanges(quality)}`;
   }
   return null;
@@ -116,6 +118,11 @@ export default function ColourInput({
             className={`${inputCls} ${error ? "!border-red-400 !ring-red-200" : ""}`}
           />
           {error && <p className="text-xs font-semibold text-red-600 mt-1">{error}</p>}
+          {quality && !hasRange && !error && (
+            <p className="text-xs font-semibold text-amber-700 mt-1">
+              No colour range set for this quality — only APC entries are allowed. Add a range via "Other…" in Quality Name.
+            </p>
+          )}
           {hasRange && (
             <datalist id="colour-options">
               {options.map((n) => (

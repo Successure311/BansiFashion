@@ -11,7 +11,7 @@ export default function AddQualityModal({ initialName = "", onClose, onAdd }) {
   const [error, setError] = useState(null);
 
   // Ranges are optional: a row left completely blank is ignored, and a quality
-  // with no ranges accepts any colour number. A started row needs both ends, end >= start.
+  // with no ranges only takes APC entries. A started row needs both ends, end >= start.
   const rowState = rows.map((r) => {
     if (r.start === "" && r.end === "") return "blank";
     if (r.start !== "" && r.end !== "" && Number(r.end) >= Number(r.start)) return "ok";
@@ -108,7 +108,7 @@ export default function AddQualityModal({ initialName = "", onClose, onAdd }) {
 
           <p className="text-xs text-gray-400 -mt-1">
             A quality can have several colour ranges. If the name already exists, the new ranges are added to it.
-            Leave ranges blank for no fixed colour range — any colour number is then accepted.
+            Only colour numbers inside a range are accepted. A quality with no range allows APC entries only.
           </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-3 pt-2">
