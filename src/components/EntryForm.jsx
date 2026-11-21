@@ -9,8 +9,9 @@ import { appendEntry } from "../api/sheetApi";
 const MODE_CONFIG = {
   // Inward's extra column is an optional "Remarks" box. The sheet column is still
   // called LotNo, so the Google Sheet / Apps Script need no change.
-  Inward: { refField: "LotNo", refLabel: "Remarks", optional: true },
-  Outward: { refField: "ChallanNo", refLabel: "Challan No." },
+  Inward: { refField: "LotNo", refLabel: "Remarks", optional: true, inputMode: "text" },
+  // Challan No. is optional too, but without the "(optional)" tag.
+  Outward: { refField: "ChallanNo", refLabel: "Challan No.", optional: true, hideTag: true, inputMode: "numeric" },
 };
 
 function toSheetDate(date) {
@@ -180,12 +181,12 @@ export default function EntryForm({ mode, qualities, addQuality, updateQuality, 
       <div>
         <label className="lbl">
           {config.refLabel}
-          {config.optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
+          {config.optional && !config.hideTag && <span>(optional)</span>}
         </label>
         <input
           type="text"
           data-field="ref"
-          inputMode={config.optional ? "text" : "numeric"}
+          inputMode={config.inputMode}
           value={refValue}
           onChange={(e) => setRefValue(e.target.value)}
           className="w-full field rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
