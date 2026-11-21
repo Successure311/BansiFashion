@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { sheetRead, appendQualityRow } from "../api/sheetApi";
+import { sheetRead, appendQualityRow, replaceQualityRanges } from "../api/sheetApi";
 import { defaultQualities } from "../data/defaultQualities";
 
 const POLL_INTERVAL_MS = 8000;
@@ -95,5 +95,12 @@ export function useQualities() {
     return trimmed;
   }, []);
 
-  return { qualities, loading, error, reload: load, addQuality };
+  // Edit box: the quality's ranges become exactly `ranges` (can be empty = APC only).
+  const updateQuality = useCallback(async ({ name, ranges }) => {
+    await replaceQualityRanges(name, ranges);
+    setQualities((prev) => mergeByName(prev, [{ name, ranges }]));
+    return name;
+  }, []);
+
+  return { qualities, loading, error, reload: load, addQuality, updateQuality };
 }

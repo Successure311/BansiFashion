@@ -22,7 +22,7 @@ function toSheetDate(date) {
 // Enter moves to the next field; Enter on the last field saves the entry.
 const NEXT_FIELD = { colour: "meter", meter: "ref" };
 
-export default function EntryForm({ mode, qualities, addQuality, showToast, rows = [], onApcSaved }) {
+export default function EntryForm({ mode, qualities, addQuality, updateQuality, showToast, rows = [], onApcSaved }) {
   const config = MODE_CONFIG[mode];
   const [date, setDate] = useState(new Date());
   const [qualityName, setQualityName] = useState("");
@@ -141,6 +141,7 @@ export default function EntryForm({ mode, qualities, addQuality, showToast, rows
           setApcText("");
         }}
         onAddQuality={addQuality}
+        onUpdateQuality={updateQuality}
         showToast={showToast}
         onPicked={() => setTimeout(() => focusField("colour"), 60)}
       />

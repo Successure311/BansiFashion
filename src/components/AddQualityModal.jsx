@@ -4,9 +4,13 @@ const blankRange = () => ({ start: "", end: "" });
 const boxCls =
   "w-full field rounded-xl border border-gray-200 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand";
 
-export default function AddQualityModal({ initialName = "", onClose, onAdd }) {
+export default function AddQualityModal({ initialName = "", initialRanges = [], editing = false, onClose, onAdd }) {
   const [name, setName] = useState(initialName);
-  const [rows, setRows] = useState([blankRange()]);
+  const [rows, setRows] = useState(() =>
+    initialRanges.length
+      ? [...initialRanges].sort((a, b) => a.start - b.start).map((r) => ({ start: String(r.start), end: String(r.end) }))
+      : [blankRange()]
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
@@ -41,7 +45,9 @@ export default function AddQualityModal({ initialName = "", onClose, onAdd }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-5 max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Add Quality / Colour Range</h3>
+        <h3 className="text-lg font-bold text-gray-800 mb-4">
+          {editing ? "Edit Colour Ranges" : "Add Quality / Colour Range"}
+        </h3>
         {/* Not a <form>: this modal renders inside the Inward/Outward <form>,
             and a nested <form> would let its submit event bubble into the
             outer form's handler instead of firing a save here. */}
@@ -49,7 +55,8 @@ export default function AddQualityModal({ initialName = "", onClose, onAdd }) {
           <div>
             <label className="lbl">Quality Name</label>
             <input
-              autoFocus
+              autoFocus={!editing}
+              disabled={editing}
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -107,7 +114,9 @@ export default function AddQualityModal({ initialName = "", onClose, onAdd }) {
           </div>
 
           <p className="text-xs text-gray-400 -mt-1">
-            A quality can have several colour ranges. If the name already exists, the new ranges are added to it.
+            {editing
+              ? "These are all the colour ranges for this quality. Change, add or remove them, then Save."
+              : "A quality can have several colour ranges. If the name already exists, the new ranges are added to it."}
             Only colour numbers inside a range are accepted. A quality with no range allows APC entries only.
           </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -125,7 +134,7 @@ export default function AddQualityModal({ initialName = "", onClose, onAdd }) {
               disabled={!isValid || saving}
               className="flex-1 btn-primary py-3 font-semibold text-white"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? "Saving…" : editing ? "Save changes" : "Save"}
             </button>
           </div>
         </div>

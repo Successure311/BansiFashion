@@ -165,6 +165,11 @@ function doPost(e) {
   }
   try {
     var body = JSON.parse(e.postData.contents);
+    if (body.action === 'replace_quality') {
+      replaceQuality_(body.name, body.ranges);
+      SpreadsheetApp.flush();
+      return json_({ ok: true });
+    }
     if (!body.sheet || !SCHEMA[body.sheet]) {
       return json_({ error: 'Unknown sheet: ' + body.sheet });
     }
@@ -181,6 +186,28 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// Replace ALL colour ranges of one quality (used by the pencil / edit box in the app).
+// Existing rows of that quality are overwritten in place, extra rows are added,
+// and surplus old rows are deleted. No ranges = one row with blank ranges.
+function replaceQuality_(name, ranges) {
+  var sh = getSheet_('QualityMaster');
+  var values = sh.getDataRange().getValues();
+  var key = String(name).trim().toLowerCase();
+  var rowNums = []; // 1-based sheet rows holding this quality
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0] || '').trim().toLowerCase() === key) rowNums.push(i + 1);
+  }
+  var wanted = ranges && ranges.length ? ranges : [{ start: '', end: '' }];
+  for (var k = 0; k < wanted.length; k++) {
+    if (k < rowNums.length) {
+      sh.getRange(rowNums[k], 1, 1, 3).setValues([[name, wanted[k].start, wanted[k].end]]);
+    } else {
+      sh.appendRow([name, wanted[k].start, wanted[k].end]);
+    }
+  }
+  for (var d = rowNums.length - 1; d >= wanted.length; d--) sh.deleteRow(rowNums[d]);
 }
 
 // Run ONCE from the Apps Script editor to create tabs + seed default qualities.

@@ -9,7 +9,7 @@ import { useToast } from "./hooks/useToast";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("Inward");
-  const { qualities, addQuality } = useQualities();
+  const { qualities, addQuality, updateQuality } = useQualities();
   const [range, setRange] = useState(null); // Analysis date filter; null = all dates
   const entries = useEntries(activeTab !== "Inward", range);
   const { toast, showToast, dismiss } = useToast();
@@ -29,10 +29,10 @@ export default function App() {
 
       <main className="flex-1 px-4 pt-5 pb-10 max-w-md w-full mx-auto">
         {activeTab === "Inward" && (
-          <EntryForm mode="Inward" qualities={qualities} addQuality={addQuality} showToast={showToast} rows={entryRows} onApcSaved={onApcSaved} />
+          <EntryForm mode="Inward" qualities={qualities} addQuality={addQuality} updateQuality={updateQuality} showToast={showToast} rows={entryRows} onApcSaved={onApcSaved} />
         )}
         {activeTab === "Outward" && (
-          <EntryForm mode="Outward" qualities={qualities} addQuality={addQuality} showToast={showToast} rows={entryRows} onApcSaved={onApcSaved} />
+          <EntryForm mode="Outward" qualities={qualities} addQuality={addQuality} updateQuality={updateQuality} showToast={showToast} rows={entryRows} onApcSaved={onApcSaved} />
         )}
         {activeTab === "Analysis" && <AnalysisTab qualities={qualities} entries={entries} onRangeChange={setRange} />}
       </main>

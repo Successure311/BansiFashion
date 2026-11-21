@@ -3,8 +3,10 @@ import AddQualityModal from "./AddQualityModal";
 
 // Searchable quality picker: type to filter, Up/Down to move, Enter to pick.
 // If only one quality matches what is typed, Enter picks it straight away.
-export default function QualitySelect({ qualities, value, onChange, onAddQuality, showToast, onPicked }) {
+export default function QualitySelect({ qualities, value, onChange, onAddQuality, onUpdateQuality, showToast, onPicked }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const selected = qualities.find((q) => q.name === value) || null;
   const [newName, setNewName] = useState("");
   const [text, setText] = useState(null); // null = show the selected quality
   const [open, setOpen] = useState(false);
@@ -62,10 +64,17 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
     onPicked?.();
   }
 
+  async function handleEdit({ name, ranges }) {
+    await onUpdateQuality({ name, ranges });
+    setEditOpen(false);
+    showToast?.(`Updated colour ranges for "${name}"`, "success");
+  }
+
   return (
     <div>
       <label className="lbl">Quality Name</label>
-      <div className="relative">
+      <div className="flex items-stretch gap-2">
+      <div className="relative min-w-0 flex-1">
         <input
           ref={inputRef}
           type="text"
@@ -118,6 +127,28 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
           </ul>
         )}
       </div>
+        {selected && (
+          <button
+            type="button"
+            onClick={() => setEditOpen(true)}
+            aria-label="Edit colour ranges"
+            title="Edit colour ranges"
+            className="field w-12 shrink-0 rounded-xl border border-gray-200 bg-white text-brand text-xl active:bg-brand-light"
+          >
+            ✎
+          </button>
+        )}
+      </div>
+
+      {editOpen && selected && (
+        <AddQualityModal
+          editing
+          initialName={selected.name}
+          initialRanges={selected.ranges}
+          onClose={() => setEditOpen(false)}
+          onAdd={handleEdit}
+        />
+      )}
 
       {modalOpen && (
         <AddQualityModal initialName={newName} onClose={() => setModalOpen(false)} onAdd={handleAdd} />

@@ -57,3 +57,12 @@ export const appendEntry = (sheet, row) => sheetPost({ sheet, row });
 
 // One QualityMaster row per colour range (a quality with several ranges has several rows).
 export const appendQualityRow = (row) => sheetPost({ sheet: "QualityMaster", row });
+
+// Replace every colour range of a quality (needs the updated Apps Script).
+export const replaceQualityRanges = (name, ranges) =>
+  sheetPost({ action: "replace_quality", name, ranges }).catch((err) => {
+    if (/Unknown sheet/i.test(err.message)) {
+      throw new Error("Update the Apps Script (Code.gs) and redeploy it, then try again.");
+    }
+    throw err;
+  });
