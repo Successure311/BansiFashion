@@ -86,8 +86,13 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
           value={text ?? value}
           placeholder="Select quality…"
           onFocus={(e) => {
-            setOpen(true);
             setHi(-1);
+            if (e.target.dataset.quiet) {
+              // Focus put here by the form after a save: ready to type, list stays closed.
+              delete e.target.dataset.quiet;
+              return;
+            }
+            setOpen(true);
             e.target.select();
           }}
           onClick={() => setOpen(true)}

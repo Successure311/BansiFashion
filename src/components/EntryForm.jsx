@@ -34,8 +34,12 @@ export default function EntryForm({ mode, qualities, addQuality, updateQuality, 
   const [saving, setSaving] = useState(false);
   const formRef = useRef(null);
 
-  function focusField(name) {
-    formRef.current?.querySelector(`[data-field="${name}"]`)?.focus();
+  // `quiet`: focus without popping open the quality list (used after a save).
+  function focusField(name, quiet = false) {
+    const el = formRef.current?.querySelector(`[data-field="${name}"]`);
+    if (!el) return;
+    if (quiet) el.dataset.quiet = "1";
+    el.focus();
   }
 
   const selectedQuality = useMemo(
@@ -105,7 +109,7 @@ export default function EntryForm({ mode, qualities, addQuality, updateQuality, 
     if (apcMode) onApcSaved?.(qualityName, row.ColourNo);
     resetFieldsAfterSubmit();
     // On a laptop, go straight back to the quality box for the next entry.
-    if (window.matchMedia?.("(pointer: fine)").matches) setTimeout(() => focusField("quality"), 0);
+    if (window.matchMedia?.("(pointer: fine)").matches) setTimeout(() => focusField("quality", true), 0);
     setSaving(true);
     setTimeout(() => setSaving(false), 400); // brief guard against a double-tap
 
