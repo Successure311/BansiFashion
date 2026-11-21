@@ -28,6 +28,15 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
     if (open && hi >= 0) listRef.current?.children[hi]?.scrollIntoView({ block: "nearest" });
   }, [hi, open]);
 
+  // Back to the quality box (list stays closed) after a pop-up window closes.
+  function refocus() {
+    setTimeout(() => {
+      if (!inputRef.current) return;
+      inputRef.current.dataset.quiet = "1";
+      inputRef.current.focus();
+    }, 0);
+  }
+
   function pick(item) {
     setOpen(false);
     setText(null);
@@ -68,6 +77,7 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
     const saved = await onUpdateQuality({ oldName: selected.name, name, ranges });
     if (saved !== selected.name) onChange(saved); // keep the renamed quality selected
     setEditOpen(false);
+    refocus();
     showToast?.(`Updated "${saved}"`, "success");
   }
 
@@ -151,7 +161,10 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
           editing
           initialName={selected.name}
           initialRanges={selected.ranges}
-          onClose={() => setEditOpen(false)}
+          onClose={() => {
+            setEditOpen(false);
+            refocus();
+          }}
           onAdd={handleEdit}
         />
       )}

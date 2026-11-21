@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { colourNumbers, formatRanges, hasRanges, inRanges } from "../data/ranges";
 
 const inputCls =
@@ -35,6 +35,22 @@ export default function ColourInput({
 
   const error = apcMode ? null : colourError(quality, value);
   const [open, setOpen] = useState(false);
+  const groupRef = useRef(null);
+  const wrapRef = useRef(null);
+
+  // Keyboard: Left/Right switch between "Colour number" and "APC"; Enter/Space on a
+  // toggle (a click with detail 0) jumps into the colour box so typing can continue.
+  function focusColourBox() {
+    setTimeout(() => wrapRef.current?.querySelector('[data-field="colour"]')?.focus(), 60);
+  }
+  function onToggleKey(e, index) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const next = e.key === "ArrowRight" ? 1 : 0;
+    if (next === index) return;
+    onApcMode(next === 1);
+    groupRef.current?.querySelectorAll("button")[next]?.focus();
+  }
   // Saved APC remarks for this quality that match what is typed (all when empty).
   const typed = apcText.trim().toLowerCase();
   const matches = apcSuggestions.filter(
@@ -42,22 +58,28 @@ export default function ColourInput({
   );
 
   return (
-    <div>
+    <div ref={wrapRef}>
       <label className="lbl flex-wrap">
         Colour No.
         {hasRange && !apcMode && <span>({formatRanges(quality)})</span>}
       </label>
 
-      <div className="grid grid-cols-2 gap-1.5 bg-brand-light rounded-xl p-1 mb-2">
+      <div ref={groupRef} role="radiogroup" className="grid grid-cols-2 gap-1.5 bg-brand-light rounded-xl p-1 mb-2">
         {[
           { id: false, label: "Colour number" },
           { id: true, label: "APC" },
-        ].map((o) => (
+        ].map((o, index) => (
           <button
             key={o.label}
             type="button"
+            role="radio"
+            aria-checked={apcMode === o.id}
             disabled={!quality}
-            onClick={() => onApcMode(o.id)}
+            onKeyDown={(e) => onToggleKey(e, index)}
+            onClick={(e) => {
+              onApcMode(o.id);
+              if (e.detail === 0) focusColourBox();
+            }}
             className={`py-2 rounded-lg text-sm font-bold transition-all disabled:opacity-50 ${
               apcMode === o.id ? "bg-white text-brand shadow" : "text-gray-500"
             }`}

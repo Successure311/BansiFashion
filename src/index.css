@@ -254,3 +254,9 @@ button.field {
 .react-datepicker__header .react-datepicker__day-name {
   color: #fff;
 }
+
+/* Keyboard focus: a clear plum outline on buttons (pencil, toggles, tabs). */
+button:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}

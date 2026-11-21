@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import DateField from "./DateField";
 import QualitySelect from "./QualitySelect";
 import ColourInput, { colourError } from "./ColourInput";
+import { hasRanges } from "../data/ranges";
 import { isApcColour, apcText as stripApc, makeApcColour } from "../data/apc";
 import { appendEntry } from "../api/sheetApi";
 
@@ -141,7 +142,9 @@ export default function EntryForm({ mode, qualities, addQuality, updateQuality, 
         onChange={(name) => {
           setQualityName(name);
           setColourNo("");
-          setApcMode(false);
+          // A quality with no colour range only takes APC entries, so start in APC mode.
+          const picked = qualities.find((q) => q.name === name);
+          setApcMode(!!picked && !hasRanges(picked));
           setApcText("");
         }}
         onAddQuality={addQuality}
