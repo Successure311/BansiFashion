@@ -239,3 +239,18 @@ button.field {
 .lbl {
   line-height: 1.4;
 }
+
+/* Laptop / tablet: calendar a bit bigger (phones keep the 1.3 scale above). */
+@media (min-width: 481px) {
+  .react-datepicker__portal .react-datepicker {
+    transform: scale(1.25);
+  }
+}
+/* Weekday names (Mon, Tue...) sit on the white body in this version, so they need a dark colour. */
+.react-datepicker__day-name {
+  color: var(--color-brand-dark);
+  font-weight: 700;
+}
+.react-datepicker__header .react-datepicker__day-name {
+  color: #fff;
+}
