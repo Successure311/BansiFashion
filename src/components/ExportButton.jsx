@@ -1,20 +1,11 @@
 import { useState } from "react";
 import { sheetReadMany } from "../api/sheetApi";
-import { formatDisplayDate, inRange, normaliseRaw } from "../data/analytics";
+import { inRange, normaliseRaw } from "../data/analytics";
 
-function describe({ range, quality, colour }) {
-  const parts = [];
-  if (!range) parts.push("All dates");
-  else if (range.from === range.to) parts.push(formatDisplayDate(range.from));
-  else parts.push(`${formatDisplayDate(range.from)} to ${formatDisplayDate(range.to)}`);
-  parts.push(quality || "All qualities");
-  if (colour) parts.push(`Colour ${colour}`);
-  return parts.join(" | ");
-}
-
-// Sits at the end of each Analysis view. Downloads ONE workbook (summary, main
-// table, pivots, graphs, inward and outward data) for the filters in use there.
-// Reads the sheet fresh when tapped, so the file always has the latest entries.
+// End of the Analysis page. Downloads a PDF: the quality name as a red title and a
+// colour-wise Inward / Outward / Difference (m) table under it, for the filters above
+// (every quality gets its own table when "All qualities" is selected).
+// Reads the sheet fresh when tapped, so the report always has the latest entries.
 export default function ExportButton({ range, quality = "", colour = "" }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(null);
@@ -34,10 +25,11 @@ export default function ExportButton({ range, quality = "", colour = "" }) {
         setMessage({ ok: false, text: "No entries for these filters." });
         return;
       }
-      // Loaded on demand so the Excel library isn't part of the normal app download.
-      const { exportExcel } = await import("../export/exportExcel");
-      await exportExcel({ inward, outward, label: describe({ range, quality, colour }) });
-      setMessage({ ok: true, text: "Excel file downloaded." });
+      // Loaded on demand so the PDF library isn't part of the normal app download.
+      const { exportPdf } = await import("../export/exportPdf");
+      const safe = (quality || "All-qualities").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      await exportPdf({ inward, outward, range, name: `${safe}-${new Date().toISOString().slice(0, 10)}` });
+      setMessage({ ok: true, text: "PDF report downloaded." });
     } catch (err) {
       setMessage({ ok: false, text: `Export failed — ${err.message || "try again"}` });
     } finally {
@@ -53,10 +45,10 @@ export default function ExportButton({ range, quality = "", colour = "" }) {
         disabled={busy}
         className="w-full btn-primary py-3.5 font-bold text-white text-base"
       >
-        {busy ? "Preparing Excel…" : "Export Excel  ↓"}
+        {busy ? "Preparing report…" : "Export Report  ↓"}
       </button>
       <p className="text-xs text-gray-400 text-center">
-        Saves inward, outward, summary, pivots and graphs for the filters above.
+        Saves a PDF table of colour-wise Inward, Outward and Difference (m) for the filters above.
       </p>
       {message && (
         <p className={`text-sm text-center font-semibold ${message.ok ? "text-emerald-700" : "text-red-600"}`}>
