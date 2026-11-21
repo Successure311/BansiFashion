@@ -73,8 +73,6 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
   function selectQuality(name) {
     setQualityName(name);
     setColourNo("");
-    // Dates only apply once a quality is picked; back to all qualities = all dates.
-    if (!name && dateMode !== "all") applyDates("all", d1, d2);
   }
 
   return (
@@ -110,6 +108,8 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
             </select>
           </div>
 
+          <DateFilter mode={dateMode} d1={d1} d2={d2} onChange={applyDates} />
+
           {qualityName && (
             <div>
               <label className="lbl">
@@ -122,9 +122,6 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
                 onChange={setColourNo}
               />
             </div>
-          )}
-          {qualityName && (
-            <DateFilter mode={dateMode} d1={d1} d2={d2} onChange={applyDates} />
           )}
         </div>
       </div>
