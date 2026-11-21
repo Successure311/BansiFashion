@@ -56,7 +56,6 @@ export default function AddQualityModal({ initialName = "", initialRanges = [], 
             <label className="lbl">Quality Name</label>
             <input
               autoFocus={!editing}
-              disabled={editing}
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -116,9 +115,14 @@ export default function AddQualityModal({ initialName = "", initialRanges = [], 
           <p className="text-xs text-gray-400 -mt-1">
             {editing
               ? "These are all the colour ranges for this quality. Change, add or remove them, then Save."
-              : "A quality can have several colour ranges. If the name already exists, the new ranges are added to it."}
+              : "A quality can have several colour ranges. If the name already exists, the new ranges are added to it."}{" "}
             Only colour numbers inside a range are accepted. A quality with no range allows APC entries only.
           </p>
+          {editing && name.trim() && name.trim() !== initialName && (
+            <p className="text-xs font-semibold text-amber-700">
+              Renaming also changes the quality name on all past Inward and Outward entries.
+            </p>
+          )}
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-3 pt-2">
             <button

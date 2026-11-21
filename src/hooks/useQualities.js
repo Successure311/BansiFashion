@@ -54,7 +54,9 @@ export function useQualities() {
     if (!silent) setLoading(true);
     try {
       const rows = await sheetRead("QualityMaster");
-      setQualities(mergeByName(defaultQualities, normaliseRows(rows)));
+      // The sheet is the source of truth; the built-in list is only a fallback when the sheet has no qualities.
+      const list = normaliseRows(rows);
+      setQualities(list.length ? mergeByName([], list) : defaultQualities);
       if (!silent) setError(null);
     } catch (err) {
       if (!silent) setError(err.message);
@@ -95,11 +97,18 @@ export function useQualities() {
     return trimmed;
   }, []);
 
-  // Edit box: the quality's ranges become exactly `ranges` (can be empty = APC only).
-  const updateQuality = useCallback(async ({ name, ranges }) => {
-    await replaceQualityRanges(name, ranges);
-    setQualities((prev) => mergeByName(prev, [{ name, ranges }]));
-    return name;
+  // Edit box: the quality's ranges become exactly `ranges` (can be empty = APC only)
+  // and the quality may be renamed (past entries are renamed in the sheet too).
+  const updateQuality = useCallback(async ({ oldName, name, ranges }) => {
+    const trimmed = name.trim();
+    await replaceQualityRanges(oldName, trimmed, ranges);
+    setQualities((prev) =>
+      mergeByName(
+        prev.filter((q) => q.name.toLowerCase() !== oldName.toLowerCase()),
+        [{ name: trimmed, ranges }]
+      )
+    );
+    return trimmed;
   }, []);
 
   return { qualities, loading, error, reload: load, addQuality, updateQuality };

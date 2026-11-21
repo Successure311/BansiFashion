@@ -166,8 +166,9 @@ function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
     if (body.action === 'replace_quality') {
-      replaceQuality_(body.name, body.ranges);
+      replaceQuality_(body.oldName || body.name, body.name, body.ranges);
       SpreadsheetApp.flush();
+      CacheService.getScriptCache().remove(SUMMARY_CACHE_KEY);
       return json_({ ok: true });
     }
     if (!body.sheet || !SCHEMA[body.sheet]) {
@@ -188,26 +189,49 @@ function doPost(e) {
   }
 }
 
-// Replace ALL colour ranges of one quality (used by the pencil / edit box in the app).
-// Existing rows of that quality are overwritten in place, extra rows are added,
-// and surplus old rows are deleted. No ranges = one row with blank ranges.
-function replaceQuality_(name, ranges) {
+// Replace ALL colour ranges of one quality (the pencil / edit box in the app), and
+// optionally rename it. Existing rows of the quality are overwritten in place,
+// extra rows are added and surplus old rows deleted. No ranges = one row with
+// blank ranges. On a rename, the quality name on every past Inward / Outward
+// entry is updated too, so nothing is left under the old name.
+function replaceQuality_(oldName, newName, ranges) {
   var sh = getSheet_('QualityMaster');
   var values = sh.getDataRange().getValues();
-  var key = String(name).trim().toLowerCase();
+  var oldKey = String(oldName).trim().toLowerCase();
+  var newKey = String(newName).trim().toLowerCase();
   var rowNums = []; // 1-based sheet rows holding this quality
   for (var i = 1; i < values.length; i++) {
-    if (String(values[i][0] || '').trim().toLowerCase() === key) rowNums.push(i + 1);
+    var rowKey = String(values[i][0] || '').trim().toLowerCase();
+    if (rowKey === oldKey) rowNums.push(i + 1);
+    else if (rowKey === newKey && newKey !== oldKey) throw new Error('A quality named "' + newName + '" already exists.');
   }
   var wanted = ranges && ranges.length ? ranges : [{ start: '', end: '' }];
   for (var k = 0; k < wanted.length; k++) {
     if (k < rowNums.length) {
-      sh.getRange(rowNums[k], 1, 1, 3).setValues([[name, wanted[k].start, wanted[k].end]]);
+      sh.getRange(rowNums[k], 1, 1, 3).setValues([[newName, wanted[k].start, wanted[k].end]]);
     } else {
-      sh.appendRow([name, wanted[k].start, wanted[k].end]);
+      sh.appendRow([newName, wanted[k].start, wanted[k].end]);
     }
   }
   for (var d = rowNums.length - 1; d >= wanted.length; d--) sh.deleteRow(rowNums[d]);
+
+  if (String(oldName).trim() !== String(newName).trim()) {
+    ['Inward', 'Outward'].forEach(function (name) {
+      var es = getSheet_(name);
+      var last = es.getLastRow();
+      if (last < 2) return;
+      var range = es.getRange(2, 2, last - 1, 1); // column B = QualityName
+      var col = range.getValues();
+      var changed = false;
+      for (var r = 0; r < col.length; r++) {
+        if (String(col[r][0]).trim().toLowerCase() === oldKey) {
+          col[r][0] = newName;
+          changed = true;
+        }
+      }
+      if (changed) range.setValues(col);
+    });
+  }
 }
 
 // Run ONCE from the Apps Script editor to create tabs + seed default qualities.

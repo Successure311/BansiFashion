@@ -65,9 +65,10 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
   }
 
   async function handleEdit({ name, ranges }) {
-    await onUpdateQuality({ name, ranges });
+    const saved = await onUpdateQuality({ oldName: selected.name, name, ranges });
+    if (saved !== selected.name) onChange(saved); // keep the renamed quality selected
     setEditOpen(false);
-    showToast?.(`Updated colour ranges for "${name}"`, "success");
+    showToast?.(`Updated "${saved}"`, "success");
   }
 
   return (
