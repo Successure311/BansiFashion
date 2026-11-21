@@ -137,7 +137,7 @@ export default function QualitySelect({ qualities, value, onChange, onAddQuality
                   i === hi ? "bg-brand-light" : ""
                 } ${it.other ? "text-brand border-t border-gray-100" : it.name === value ? "text-brand" : "text-gray-800"}`}
               >
-                {it.other ? "Other… (add new quality / colour range)" : it.name}
+                {it.other ? "Other (Add New Quality / Colour Range)" : it.name}
               </li>
             ))}
           </ul>
