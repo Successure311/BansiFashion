@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import Header from "./components/Header";
-import TabBar from "./components/TabBar";
 import EntryForm from "./components/EntryForm";
-import AnalysisTab from "./components/AnalysisTab";
+import AnalysisHub from "./components/AnalysisHub";
 import Toast from "./components/Toast";
 import { useQualities } from "./hooks/useQualities";
 import { useEntries } from "./hooks/useEntries";
@@ -26,17 +25,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <TabBar active={activeTab} onChange={setActiveTab} />
+      <Header active={activeTab} onChange={setActiveTab} />
 
-      <main className="flex-1 px-4 pt-2 pb-10 max-w-md w-full mx-auto">
+      <main className="flex-1 px-4 pt-5 pb-10 max-w-md w-full mx-auto">
         {activeTab === "Inward" && (
           <EntryForm mode="Inward" qualities={qualities} addQuality={addQuality} showToast={showToast} rows={entryRows} onApcSaved={onApcSaved} />
         )}
         {activeTab === "Outward" && (
           <EntryForm mode="Outward" qualities={qualities} addQuality={addQuality} showToast={showToast} rows={entryRows} onApcSaved={onApcSaved} />
         )}
-        {activeTab === "Analysis" && <AnalysisTab qualities={qualities} entries={entries} onRangeChange={setRange} />}
+        {activeTab === "Analysis" && <AnalysisHub qualities={qualities} entries={entries} onRangeChange={setRange} />}
       </main>
 
       <Toast toast={toast} onDismiss={dismiss} />
