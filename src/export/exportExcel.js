@@ -61,6 +61,10 @@ function frame(g, W, H, L, R, T, B, title, series, max) {
   }
 }
 
+function fmtVal(v) {
+  return v.toLocaleString(undefined, { maximumFractionDigits: 1 });
+}
+
 function rotatedLabel(g, text, x, y) {
   g.save();
   g.translate(x, y);
@@ -90,6 +94,12 @@ function barChart(title, labels, series) {
       const h = ((H - T - B) * s.values[i]) / max;
       g.fillStyle = s.color;
       g.fillRect(gx + barW * k, H - B - h, barW - 2, h);
+      if (s.values[i] > 0) {
+        g.fillStyle = "#222";
+        g.font = "bold 12px sans-serif";
+        g.textAlign = "center";
+        g.fillText(fmtVal(s.values[i]), gx + barW * k + (barW - 2) / 2, H - B - h - 6);
+      }
     });
     rotatedLabel(g, label, L + groupW * i + groupW / 2 + 6, H - B + 18);
   });
@@ -109,7 +119,8 @@ function lineChart(title, labels, series) {
   const step = (W - L - R) / Math.max(labels.length - 1, 1);
   const x = (i) => (labels.length === 1 ? L + (W - L - R) / 2 : L + step * i);
   const y = (v) => H - B - ((H - T - B) * v) / max;
-  series.forEach((s) => {
+  const labelEvery = Math.ceil(labels.length / 12); // keep value labels readable on long ranges
+  series.forEach((s, k) => {
     g.strokeStyle = s.color;
     g.lineWidth = 3;
     g.beginPath();
@@ -120,6 +131,15 @@ function lineChart(title, labels, series) {
       g.beginPath();
       g.arc(x(i), y(v), 4, 0, Math.PI * 2);
       g.fill();
+      if (i % labelEvery === 0) {
+        // Stagger the series so labels of different lines don't sit on top of each other.
+        const dy = k === 1 ? 20 : k === 0 ? -10 : -24;
+        g.fillStyle = s.color;
+        g.font = "bold 12px sans-serif";
+        g.textAlign = "center";
+        g.fillText(fmtVal(v), x(i), y(v) + dy);
+        g.fillStyle = s.color;
+      }
     });
   });
   const every = Math.ceil(labels.length / 14);
