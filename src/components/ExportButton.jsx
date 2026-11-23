@@ -28,7 +28,7 @@ export default function ExportButton({ range, quality = "", colour = "" }) {
       // Loaded on demand so the PDF library isn't part of the normal app download.
       const { exportPdf } = await import("../export/exportPdf");
       const safe = (quality || "All-qualities").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      await exportPdf({ inward, outward, range, quality, name: `${safe}-${new Date().toISOString().slice(0, 10)}` });
+      await exportPdf({ inward, outward, range, name: `${safe}-${new Date().toISOString().slice(0, 10)}` });
       setMessage({ ok: true, text: "PDF report downloaded." });
     } catch (err) {
       setMessage({ ok: false, text: `Export failed — ${err.message || "try again"}` });
@@ -48,7 +48,7 @@ export default function ExportButton({ range, quality = "", colour = "" }) {
         {busy ? "Preparing report…" : "Export Report  ↓"}
       </button>
       <p className="text-xs text-gray-400 text-center">
-        Saves a PDF table of Colour No., Quality Name and Difference (m) for the filters above.
+        Saves a PDF of colour-wise Difference (m) tables for the filters above.
       </p>
       {message && (
         <p className={`text-sm text-center font-semibold ${message.ok ? "text-emerald-700" : "text-red-600"}`}>
