@@ -8,9 +8,9 @@ export default function BreakdownTable({ columnLabel, rows, activeKey, onRowClic
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-100">
+    <div className="overflow-auto max-h-[52vh] rounded-xl border border-gray-100">
       <table className="w-full text-sm">
-        <thead>
+        <thead className="sticky top-0 z-10">
           <tr className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wide">
             <th className="text-left px-3 py-2.5">{columnLabel}</th>
             <th className="text-right px-3 py-2.5">Inward</th>
