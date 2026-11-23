@@ -6,17 +6,13 @@ const MARGIN = 40;
 
 const fmt = (n) => n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
-// Colour numbers that appear under more than one quality go in one combined table
-// (Colour No. | Quality Name | Difference (m)). Everything else gets one table per
+// Colour numbers that appear under more than one quality go in one combined table:
+// one row per colour number, and a column (with its Difference (m)) for each quality that uses it. Everything else gets one table per
 // quality below it: the quality name as a red title, then Colour No. | Difference (m).
 // All cells are centred and fully ruled.
 export async function buildPdf({ inward, outward, range }) {
   const { jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
-
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const textWidth = doc.internal.pageSize.getWidth() - MARGIN * 2;
 
   const dateText = range
     ? range.from === range.to
@@ -33,12 +29,21 @@ export async function buildPdf({ inward, outward, range }) {
     qualitiesOf.get(r.ColourNo).add(r.QualityName);
   }
   const isShared = (r) => qualitiesOf.get(r.ColourNo).size > 1;
-  const shared = lines.filter(isShared).sort((a, b) => colourSort(a.ColourNo, b.ColourNo) || a.QualityName.localeCompare(b.QualityName));
+  const shared = lines.filter(isShared);
+  // Matrix for the shared colours: one row per colour number, one column per quality that uses any of them.
+  const sharedColours = Array.from(new Set(shared.map((r) => r.ColourNo))).sort(colourSort);
+  const sharedQualities = Array.from(new Set(shared.map((r) => r.QualityName))).sort((a, b) => a.localeCompare(b));
+  const diffOf = new Map(shared.map((r) => [`${r.ColourNo}|${r.QualityName}`, r.inward - r.outward]));
   const groups = new Map();
   for (const r of lines.filter((r) => !isShared(r))) {
     if (!groups.has(r.QualityName)) groups.set(r.QualityName, []);
     groups.get(r.QualityName).push(r);
   }
+
+  // Many quality columns need the wider (landscape) page.
+  const doc = new jsPDF({ unit: "pt", format: "a4", orientation: sharedQualities.length > 4 ? "landscape" : "portrait" });
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const textWidth = doc.internal.pageSize.getWidth() - MARGIN * 2;
 
   const common = {
     theme: "grid",
@@ -72,13 +77,17 @@ export async function buildPdf({ inward, outward, range }) {
   }
 
   if (shared.length) {
-    title("Same Colour No. in Different Qualities", shared.length);
+    title("Same Colour No. in Different Qualities", sharedColours.length);
     autoTable(doc, {
       ...common,
       startY: y + 6,
-      head: [["Colour No.", "Quality Name", "Difference (m)"]],
-      body: shared.map((r) => [r.ColourNo, r.QualityName, fmt(r.inward - r.outward)]),
-      columnStyles: { 0: { cellWidth: 90 }, 2: { cellWidth: 110 } },
+      head: [["Colour No.", ...sharedQualities.map((q) => `${q}
+Difference (m)`)]],
+      body: sharedColours.map((c) => [
+        c,
+        ...sharedQualities.map((q) => (diffOf.has(`${c}|${q}`) ? fmt(diffOf.get(`${c}|${q}`)) : "")),
+      ]),
+      columnStyles: { 0: { cellWidth: 70 } },
     });
     y = doc.lastAutoTable.finalY + 30;
   }
