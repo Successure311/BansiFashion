@@ -3,6 +3,7 @@ import SummaryCards from "./SummaryCards";
 import BreakdownTable from "./BreakdownTable";
 import ColourSearch from "./ColourSearch";
 import DateFilter from "./DateFilter";
+import QualitySearch from "./QualitySearch";
 import ExportButton from "./ExportButton";
 import { buildRange } from "../data/dates";
 
@@ -94,18 +95,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
 
           <div>
             <label className="lbl">Quality Name</label>
-            <select
-              value={qualityName}
-              onChange={(e) => selectQuality(e.target.value)}
-              className="w-full field rounded-xl border border-gray-200 px-3.5 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
-            >
-              <option value="">All qualities</option>
-              {qualities.map((q) => (
-                <option key={q.name} value={q.name}>
-                  {q.name}
-                </option>
-              ))}
-            </select>
+            <QualitySearch qualities={qualities} value={qualityName} onChange={selectQuality} />
           </div>
 
           <DateFilter mode={dateMode} d1={d1} d2={d2} onChange={applyDates} />
@@ -134,7 +124,18 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
             label={colourNo ? `${qualityName} — Colour ${colourNo}` : qualityName}
           />
           <div className="surface-card card-accent rounded-3xl p-5 space-y-3">
-            <p className="text-sm font-semibold text-gray-500">Colour-wise</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-500">Colour-wise</p>
+              <button
+                type="button"
+                onClick={() => selectQuality("")}
+                aria-label="Back to all qualities"
+                title="Back to all qualities"
+                className="w-10 h-10 rounded-full border border-brand/30 bg-brand-light text-brand text-xl font-bold leading-none active:bg-brand active:text-white"
+              >
+                ←
+              </button>
+            </div>
             <BreakdownTable
               columnLabel="Colour No."
               rows={colourRows}
