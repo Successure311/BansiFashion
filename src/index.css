@@ -149,7 +149,7 @@ body {
 
 .card-accent {
   position: relative;
-  overflow: hidden;
+  /* no overflow:hidden - dropdown lists must be able to extend past the card */
   /* Full gradient border (plum -> gold -> plum) all the way round. */
   border: 3px solid transparent;
   background:
