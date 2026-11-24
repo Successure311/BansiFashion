@@ -10,9 +10,10 @@ const APC_KEY = "APC";
 // `items`: [{ name, ranges: [{start, end}], hasApc }]  (ranges only when the quality has 2+)
 // onConfirm receives [{ name, keys }]; `keys` is null (everything) or the Set of chosen range keys.
 export default function QualityPicker({ items, onCancel, onConfirm }) {
-  const [selected, setSelected] = useState(() => new Set(items.map((i) => i.name)));
-  // name -> Set of ticked range keys (starts with every option ticked)
-  const [picked, setPicked] = useState(() => new Map(items.map((i) => [i.name, new Set(optionsOf(i))])));
+  // Everything starts clear: the user ticks what the report should contain.
+  const [selected, setSelected] = useState(() => new Set());
+  // name -> Set of ticked range keys (none ticked = the whole quality, all its colour ranges)
+  const [picked, setPicked] = useState(() => new Map(items.map((i) => [i.name, new Set()])));
   const [query, setQuery] = useState("");
 
   const shown = useMemo(() => {
@@ -34,13 +35,6 @@ export default function QualityPicker({ items, onCancel, onConfirm }) {
     if (cur.has(key)) cur.delete(key);
     else cur.add(key);
     setPicked(new Map(picked).set(item.name, cur));
-    // Nothing left ticked under a quality = the quality is not in the report.
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (cur.size === 0) next.delete(item.name);
-      else next.add(item.name);
-      return next;
-    });
   }
 
   function setShown(on) {
@@ -49,12 +43,11 @@ export default function QualityPicker({ items, onCancel, onConfirm }) {
       shown.forEach((i) => (on ? next.add(i.name) : next.delete(i.name)));
       return next;
     });
-    if (on) {
+    if (!on) {
+      // Clear also forgets the range ticks of the names shown.
       setPicked((prev) => {
         const next = new Map(prev);
-        shown.forEach((i) => {
-          if (next.get(i.name).size === 0) next.set(i.name, new Set(optionsOf(i)));
-        });
+        shown.forEach((i) => next.set(i.name, new Set()));
         return next;
       });
     }
@@ -67,7 +60,8 @@ export default function QualityPicker({ items, onCancel, onConfirm }) {
       chosen.map((i) => {
         const all = optionsOf(i);
         const ticked = picked.get(i.name);
-        const full = all.length === 0 || all.every((k) => ticked.has(k));
+        // No range ticked (or every one ticked) = the whole quality.
+        const full = all.length === 0 || ticked.size === 0 || all.every((k) => ticked.has(k));
         return { name: i.name, keys: full ? null : ticked };
       })
     );
@@ -118,7 +112,7 @@ export default function QualityPicker({ items, onCancel, onConfirm }) {
                 </label>
                 {opts.length > 0 && selected.has(i.name) && (
                   <div className="pl-11 pr-3.5 pb-3">
-                    <p className="text-xs text-gray-400 mb-1">Colour ranges in the report</p>
+                    <p className="text-xs text-gray-400 mb-1">Colour ranges — tick to limit, none ticked = all</p>
                     <div className="flex flex-wrap gap-2">
                       {opts.map((k) => {
                         const on = picked.get(i.name).has(k);
