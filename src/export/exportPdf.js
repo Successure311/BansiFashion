@@ -1,15 +1,13 @@
 import { byQualityColour, colourSort, formatDisplayDate } from "../data/analytics";
 
-const RED = [200, 0, 0];
 const BLACK = [0, 0, 0];
 const MARGIN = 40;
 
 const fmt = (n) => n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
 // Two or more qualities: ONE table sorted by colour number - a row per colour number, a column
-// (with its Difference (m)) per quality, and "-" where that quality has no such colour.
-// One quality: its name as a red title and a Colour No. | Difference (m) table.
-// All cells are centred and fully ruled.
+// per quality (headed by the quality name only), and "-" where that quality has no such colour.
+// One quality: a Colour No. | <quality name> table. No titles. Cells are centred and fully ruled.
 export async function buildPdf({ inward, outward, range }) {
   const { jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
@@ -27,7 +25,6 @@ export async function buildPdf({ inward, outward, range }) {
 
   // Many quality columns need the wider (landscape) page.
   const doc = new jsPDF({ unit: "pt", format: "a4", orientation: qualities.length > 4 ? "landscape" : "portrait" });
-  const textWidth = doc.internal.pageSize.getWidth() - MARGIN * 2;
 
   const common = {
     theme: "grid",
@@ -36,31 +33,21 @@ export async function buildPdf({ inward, outward, range }) {
     headStyles: { fillColor: [255, 255, 255], textColor: BLACK, fontStyle: "bold", halign: "center" },
   };
 
-  let y = MARGIN + 6;
-  // Red title (+ small date note).
-  function title(text) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(17);
-    const titleLines = doc.splitTextToSize(text, textWidth);
-    doc.setTextColor(...RED);
-    doc.text(titleLines, MARGIN, y);
-    y += titleLines.length * 20 - 6;
-    if (dateText) {
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(90, 90, 90);
-      doc.text(dateText, MARGIN, y + 10);
-      y += 14;
-    }
+  let y = MARGIN;
+  // Only a small grey note when a date / range filter is on.
+  if (dateText) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(90, 90, 90);
+    doc.text(dateText, MARGIN, y + 6);
+    y += 18;
   }
 
   if (qualities.length >= 2) {
-    title("Colour-wise Difference (m)");
     autoTable(doc, {
       ...common,
-      startY: y + 6,
-      head: [["Colour No.", ...qualities.map((q) => `${q}
-Difference (m)`)]],
+      startY: y,
+      head: [["Colour No.", ...qualities]],
       body: colours.map((c) => [
         c,
         ...qualities.map((q) => (diffOf.has(`${c}|${q}`) ? fmt(diffOf.get(`${c}|${q}`)) : "-")),
@@ -68,11 +55,10 @@ Difference (m)`)]],
       columnStyles: { 0: { cellWidth: 70 } },
     });
   } else if (qualities.length === 1) {
-    title(qualities[0]);
     autoTable(doc, {
       ...common,
-      startY: y + 6,
-      head: [["Colour No.", "Difference (m)"]],
+      startY: y,
+      head: [["Colour No.", qualities[0]]],
       body: lines.map((r) => [r.ColourNo, fmt(r.inward - r.outward)]),
       tableWidth: 300,
     });

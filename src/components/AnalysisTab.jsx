@@ -155,7 +155,7 @@ export default function AnalysisTab({ qualities, entries, onRangeChange }) {
         </div>
       )}
 
-      <ExportButton range={buildRange(dateMode, d1, d2)} quality={qualityName} colour={colourNo} />
+      <ExportButton range={buildRange(dateMode, d1, d2)} quality={qualityName} colour={colourNo} qualities={qualities} />
     </div>
   );
 }

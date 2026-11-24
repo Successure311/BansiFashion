@@ -2,14 +2,15 @@ import { useState } from "react";
 import QualityPicker from "./QualityPicker";
 import { sheetReadMany } from "../api/sheetApi";
 import { inRange, normaliseRaw } from "../data/analytics";
+import { isApcColour } from "../data/apc";
 
 // End of the Analysis page. Downloads a PDF of colour-wise Difference (m) tables for the
 // filters above. With more than one quality in the data, a pop-up first lets you pick which
 // qualities go in the report. Reads the sheet fresh when tapped, so it has the latest entries.
-export default function ExportButton({ range, quality = "", colour = "" }) {
+export default function ExportButton({ range, quality = "", colour = "", qualities = [] }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(null);
-  const [pending, setPending] = useState(null); // { inward, outward } waiting for the quality pick
+  const [pending, setPending] = useState(null); // { inward, outward, items } waiting for the quality / range pick
 
   async function generate(inward, outward, label) {
     // Loaded on demand so the PDF library isn't part of the normal app download.
@@ -20,18 +21,24 @@ export default function ExportButton({ range, quality = "", colour = "" }) {
   }
 
   async function confirmPick(chosen) {
-    const { inward, outward } = pending;
+    const { inward, outward, items } = pending;
     setPending(null);
     setBusy(true);
     setMessage(null);
     try {
-      const keep = new Set(chosen);
-      const label = chosen.length === 1 ? chosen[0] : chosen.length === pending.names.length ? "All-qualities" : "Selected-qualities";
-      await generate(
-        inward.filter((r) => keep.has(r.QualityName)),
-        outward.filter((r) => keep.has(r.QualityName)),
-        label
-      );
+      const byName = new Map(chosen.map((c) => [c.name, c.keys]));
+      const rangesOf = new Map(items.map((i) => [i.name, i.ranges]));
+      // A row stays if its quality is ticked and, when only some colour ranges are ticked, its colour is in one of them.
+      const keep = (r) => {
+        if (!byName.has(r.QualityName)) return false;
+        const keys = byName.get(r.QualityName);
+        if (!keys) return true;
+        if (isApcColour(r.ColourNo)) return keys.has("APC");
+        const n = Number(r.ColourNo);
+        return (rangesOf.get(r.QualityName) || []).some((g) => n >= g.start && n <= g.end && keys.has(`${g.start}-${g.end}`));
+      };
+      const label = chosen.length === 1 ? chosen[0].name : chosen.length === items.length ? "All-qualities" : "Selected-qualities";
+      await generate(inward.filter(keep), outward.filter(keep), label);
     } catch (err) {
       setMessage({ ok: false, text: `Export failed — ${err.message || "try again"}` });
     } finally {
@@ -54,11 +61,16 @@ export default function ExportButton({ range, quality = "", colour = "" }) {
         setMessage({ ok: false, text: "No entries for these filters." });
         return;
       }
-      const names = Array.from(new Set([...inward, ...outward].map((r) => r.QualityName))).sort((x, y) =>
-        x.localeCompare(y)
-      );
-      if (names.length > 1) {
-        setPending({ inward, outward, names }); // let the user choose the qualities first
+      const allRows = [...inward, ...outward];
+      const names = Array.from(new Set(allRows.map((r) => r.QualityName))).sort((x, y) => x.localeCompare(y));
+      const items = names.map((name) => ({
+        name,
+        ranges: qualities.find((q) => q.name === name)?.ranges || [],
+        hasApc: allRows.some((r) => r.QualityName === name && isApcColour(r.ColourNo)),
+      }));
+      // Several qualities, or one quality with several colour ranges: let the user choose what goes in.
+      if (names.length > 1 || items[0].ranges.length > 1) {
+        setPending({ inward, outward, items });
         return;
       }
       await generate(inward, outward, names[0]);
@@ -80,10 +92,10 @@ export default function ExportButton({ range, quality = "", colour = "" }) {
         {busy ? "Preparing report…" : "Export Report  ↓"}
       </button>
       <p className="text-xs text-gray-400 text-center">
-        Saves a PDF of colour-wise Difference (m) tables for the filters above.
+        Saves a PDF of the colour-wise table for the filters above.
       </p>
       {pending && (
-        <QualityPicker qualities={pending.names} onCancel={() => setPending(null)} onConfirm={confirmPick} />
+        <QualityPicker items={pending.items} onCancel={() => setPending(null)} onConfirm={confirmPick} />
       )}
       {message && (
         <p className={`text-sm text-center font-semibold ${message.ok ? "text-emerald-700" : "text-red-600"}`}>
